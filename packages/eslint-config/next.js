@@ -5,6 +5,7 @@ const project = resolve(process.cwd(), "tsconfig.json");
 /** @type {import("eslint").Linter.Config} */
 module.exports = {
   extends: [
+    require.resolve("./sort-imports"),
     "eslint:recommended",
     "prettier",
     require.resolve("@vercel/style-guide/eslint/next"),
