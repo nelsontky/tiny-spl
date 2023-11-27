@@ -13,7 +13,7 @@ export const CONNECTION = new Connection(process.env.RPC_URL!, "confirmed");
 
 export const PROGRAM = new Program(
   idl as any,
-  "Csp1puACJBUVDZV5PZqdHnHHBbhQe76GiaxAGMZDQZ8L",
+  "tsP1jf31M3iGNPmANP3ep3iWCMTxpMFLNbewWVWWbSo",
   new AnchorProvider(CONNECTION, new Wallet(SIGNER), {
     commitment: "confirmed",
   })
