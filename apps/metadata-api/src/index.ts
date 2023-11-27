@@ -1,13 +1,6 @@
-import { error, json } from "itty-router";
-import apiRouter from "./router";
-import { Env } from "./types/env";
+import { onRequest } from "firebase-functions/v2/https";
+import { fetchTransactionMetadata } from "./services/fetch-transaction-metadata";
 
-export default {
-	async fetch(
-		request: Request,
-		env: Env,
-		ctx: ExecutionContext,
-	): Promise<Response> {
-		return apiRouter.handle(request, env, ctx).then(json).catch(error);
-	},
-};
+export const tx = onRequest((request, response) => {
+  fetchTransactionMetadata(request, response);
+});
