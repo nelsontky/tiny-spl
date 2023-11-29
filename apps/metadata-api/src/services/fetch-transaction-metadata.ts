@@ -7,7 +7,7 @@ export const fetchTransactionMetadata = async (
   request: Request,
   response: Response<any>
 ) => {
-  const txId = request.query.txId;
+  const txId = request.query.id;
   if (typeof txId !== "string") {
     response.status(404).send({ status: 404, message: "Not Found" });
     return;

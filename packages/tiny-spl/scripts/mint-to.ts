@@ -55,7 +55,7 @@ async function mintTo() {
   );
 
   const ix = await PROGRAM.methods
-    .mintTo(new BN(10))
+    .mintTo(new BN(Number.MAX_SAFE_INTEGER))
     .accounts({
       bubblegumSigner,
       collectionMetadata: metadata,

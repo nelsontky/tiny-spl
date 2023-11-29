@@ -10,7 +10,7 @@ export default function generateMetaData(): string {
     path.join(__dirname, "assets", "image.webp")
   );
   const imageBase64 = imageFile.toString("base64");
-  const imageUri = `data:image/png;base64,${imageBase64}`;
+  const imageUri = `data:image/webp;base64,${imageBase64}`;
 
   const metadataFile = fs.readFileSync(
     path.join(__dirname, "assets", "metadata.json")

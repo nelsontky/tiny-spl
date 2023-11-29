@@ -20,6 +20,10 @@
       {
         "source": "/tx",
         "function": "tx"
+      },
+      {
+        "source": "/collection",
+        "function": "collection"
       }
     ]
   }

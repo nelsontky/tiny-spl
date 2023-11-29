@@ -6,7 +6,7 @@ import {
   SIGNER,
   TOKEN_MINT_KEY,
 } from "./constants";
-import collectionMetadata from "./metadatas/collection-metadata.json";
+import collectionMetadata from "./assets/metadata.json";
 import {
   PublicKey,
   SYSVAR_INSTRUCTIONS_PUBKEY,
@@ -46,7 +46,7 @@ async function createMint() {
     .createMint({
       name: collectionMetadata.name,
       symbol: collectionMetadata.symbol,
-      uri: "https://bafkreidc4csxxgigt32sqzqhs6zqvsbe44pm5zs3ykb34r23n5ns5e5uq4.ipfs.nftstorage.link/",
+      uri: process.env.MINT_METADATA_URI,
     })
     .accounts({
       tinySplAuthority,

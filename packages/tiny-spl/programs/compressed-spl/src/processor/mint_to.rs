@@ -38,12 +38,26 @@ pub fn mint_to(ctx: Context<MintTo>, amount: u64) -> Result<()> {
         &seeds,
     );
 
+    let collection_mint = ctx.accounts.collection_mint.key().to_string();
+    let symbol = collection_metadata.symbol;
+    let formatted_amount = amount
+        .to_string()
+        .as_bytes()
+        .rchunks(3)
+        .rev()
+        .map(std::str::from_utf8)
+        .flat_map(|x| x)
+        .collect::<Vec<_>>()
+        .join(",");
+
     mint_tiny_nft_to_collection(
         cpi_context,
         MetadataArgs {
-            name: collection_metadata.name,
-            symbol: collection_metadata.symbol,
-            uri: format!("https://bafybeiagngho2qee3p6xd553fxkjzmbmvhifpj2jkq3rdwf5ehtlypjq7m.ipfs.nftstorage.link/amount/{amount}"),
+            name: format!("{formatted_amount} {symbol}"),
+            symbol,
+            uri: format!(
+                "https://metadata.tinys.pl/collection?id={collection_mint}&amount={amount}"
+            ),
         },
     )?;
 
@@ -123,7 +137,8 @@ pub struct MintTo<'info> {
     pub leaf_delegate: AccountInfo<'info>,
     #[account(mut)]
     /// CHECK: unsafe
-    pub merkle_tree: UncheckedAccount<'info>,
+    pub merkle_tree: UncheckedAccount<'info>, // TODO: ensure that tree delegate is None and tree_authority is tiny_spl_authority
+    // currently not enforced to simplify testing
     pub mint_authority: Signer<'info>,
     /// CHECK: checked in cpi to bubblegum
     pub collection_mint: UncheckedAccount<'info>,

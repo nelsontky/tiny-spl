@@ -24,7 +24,13 @@ export const fetchTokenCollectionAndAmount = async (
       return;
     }
 
-    if (typeof tokenAmount !== "string" || isNaN(Number(tokenAmount))) {
+    if (typeof tokenAmount !== "string") {
+      response.status(400).send({ status: 400, message: "Bad Request" });
+      return;
+    }
+    try {
+      BigInt(tokenAmount);
+    } catch {
       response.status(400).send({ status: 400, message: "Bad Request" });
       return;
     }
@@ -32,13 +38,25 @@ export const fetchTokenCollectionAndAmount = async (
     const asset = await fetchDigitalAsset(umi, publicKey(collectionId));
     const metadataUri = asset.metadata.uri;
     const collectionMetadata = await fetch(metadataUri).then((res) =>
-      res.json()
+      !res.ok ? Promise.reject(res) : res.json()
     );
 
+    const formattedAmount = new Intl.NumberFormat("en-US").format(
+      BigInt(tokenAmount)
+    );
+    collectionMetadata.name = `${formattedAmount} ${asset.metadata.symbol}`;
     collectionMetadata.attributes = [
       {
         trait_type: "Amount",
-        value: new Intl.NumberFormat("en-US").format(Number(tokenAmount)),
+        value: formattedAmount,
+      },
+      {
+        trait_type: "Token name",
+        value: asset.metadata.name,
+      },
+      {
+        trait_type: "Token mint",
+        value: asset.mint.publicKey.toString(),
       },
     ];
 
