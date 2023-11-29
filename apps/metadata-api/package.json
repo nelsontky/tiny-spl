@@ -4,7 +4,7 @@
     "lint": "eslint --ext .js,.ts .",
     "build": "tsc --skipLibCheck",
     "build:watch": "tsc --watch --skipLibCheck",
-    "serve": "pnpm run build && firebase emulators:start --only functions,hosting",
+    "dev": "pnpm run build && firebase emulators:start --only functions",
     "shell": "pnpm run build && firebase functions:shell",
     "start": "pnpm run shell",
     "deploy": "firebase deploy --only functions",
@@ -15,8 +15,12 @@
   },
   "main": "lib/index.js",
   "dependencies": {
+    "@metaplex-foundation/mpl-token-metadata": "^3.1.1",
+    "@metaplex-foundation/umi": "^0.8.10",
+    "@metaplex-foundation/umi-bundle-defaults": "^0.8.10",
     "@solana/web3.js": "^1.87.6",
     "bs58": "^5.0.0",
+    "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "firebase-admin": "^11.8.0",
     "firebase-functions": "^4.3.1"
