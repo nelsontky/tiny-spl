@@ -35,15 +35,14 @@ export const fetchTokenCollectionAndAmount = async (
       res.json()
     );
 
-    response.send({
-      ...collectionMetadata,
-      attributes: [
-        {
-          trait_type: "Amount",
-          value: new Intl.NumberFormat("en-US").format(Number(tokenAmount)),
-        },
-      ],
-    });
+    collectionMetadata.attributes = [
+      {
+        trait_type: "Amount",
+        value: new Intl.NumberFormat("en-US").format(Number(tokenAmount)),
+      },
+    ];
+
+    response.send(collectionMetadata);
   } catch {
     response.status(500).send({
       status: 500,
