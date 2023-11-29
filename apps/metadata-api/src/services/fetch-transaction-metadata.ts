@@ -1,11 +1,11 @@
 import { Connection } from "@solana/web3.js";
 import * as bs58 from "bs58";
-import * as express from "express";
-import { Request } from "firebase-functions/v2/https";
+import type { Response } from "express";
+import type { Request } from "firebase-functions/v2/https";
 
 export const fetchTransactionMetadata = async (
   request: Request,
-  response: express.Response<any>
+  response: Response<any>
 ) => {
   const txId = request.query.txId;
   if (typeof txId !== "string") {
