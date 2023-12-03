@@ -137,8 +137,7 @@ pub struct MintTo<'info> {
     pub leaf_delegate: AccountInfo<'info>,
     #[account(mut)]
     /// CHECK: unsafe
-    pub merkle_tree: UncheckedAccount<'info>, // TODO: ensure that tree delegate is None and tree_authority is tiny_spl_authority
-    // currently not enforced to simplify testing
+    pub merkle_tree: UncheckedAccount<'info>, // TODO: ensure that tree delegate is None and tree_authority is tiny_spl_authority, currently not enforced to simplify testing
     pub mint_authority: Signer<'info>,
     /// CHECK: checked in cpi to bubblegum
     pub collection_mint: UncheckedAccount<'info>,
