@@ -9,6 +9,10 @@ export const SIGNER = Keypair.fromSecretKey(
   Uint8Array.from(JSON.parse(process.env.SIGNER!))
 );
 
+export const WRONG_AUTHORITY = Keypair.fromSecretKey(
+  Uint8Array.from(JSON.parse(process.env.WRONG_AUTHORITY!))
+);
+
 export const CONNECTION = new Connection(process.env.RPC_URL!, "confirmed");
 
 export const PROGRAM = new Program(

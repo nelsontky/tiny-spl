@@ -4,8 +4,9 @@
   "scripts": {
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
     "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
-    "build": "anchor build",
-    "deploy": "anchor deploy  --program-name tiny_spl --provider.cluster $MAINNET_RPC --program-keypair target/deploy/tiny_spl-keypair.json --provider.wallet target/deploy/program-authority.json"
+    "build": "anchor build && ts-node scripts/add-missing-idl-types.ts",
+    "deploy": "anchor deploy  --program-name tiny_spl --provider.cluster $MAINNET_RPC --program-keypair target/deploy/tiny_spl-keypair.json --provider.wallet target/deploy/program-authority.json",
+    "test": "anchor test --provider.cluster $MAINNET_RPC --skip-deploy --skip-build --provider.wallet target/deploy/program-authority.json"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.29.0",
