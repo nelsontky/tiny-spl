@@ -1,13 +1,16 @@
 mod constants;
 mod error;
+mod noop;
 mod processor;
 mod state;
-mod noop;
 mod utils;
 
-use std::{ptr::null_mut, alloc::Layout, mem::size_of};
+use std::{alloc::Layout, mem::size_of, ptr::null_mut};
 
-use anchor_lang::{prelude::*, solana_program::entrypoint::{HEAP_START_ADDRESS, HEAP_LENGTH}};
+use anchor_lang::{
+    prelude::*,
+    solana_program::entrypoint::{HEAP_LENGTH, HEAP_START_ADDRESS},
+};
 use processor::*;
 use state::CnftMetadata;
 
@@ -24,7 +27,11 @@ pub mod tiny_spl {
         processor::init_logging_metadata_account(ctx, total_metadata_bytes)
     }
 
-    pub fn upload_logging_metadata(ctx: Context<UploadLoggingMetadata>, index: u32, bytes: Vec<u8>) -> Result<()> {
+    pub fn upload_logging_metadata(
+        ctx: Context<UploadLoggingMetadata>,
+        index: u32,
+        bytes: Vec<u8>,
+    ) -> Result<()> {
         processor::upload_logging_metadata(ctx, index, bytes)
     }
 
@@ -49,12 +56,12 @@ pub mod tiny_spl {
 
     pub fn upload_cnft_metadata<'info>(
         ctx: Context<'_, '_, '_, 'info, UploadCnftMetadata<'info>>,
+        asset_id: Pubkey,
         root: [u8; 32],
         cnft_metadata: CnftMetadata,
-        nonce: u64,
-        index: u32,
+        index: u64,
     ) -> Result<()> {
-        processor::upload_cnft_metadata(ctx, root, cnft_metadata, nonce, index)
+        processor::upload_cnft_metadata(ctx, asset_id, root, cnft_metadata, index)
     }
 }
 

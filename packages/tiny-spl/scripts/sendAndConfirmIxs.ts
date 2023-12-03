@@ -27,6 +27,7 @@ export const sendAndConfirmIxs = async (
   const txid = await CONNECTION.sendTransaction(transaction, {
     skipPreflight,
   });
+  console.log(`https://solscan.io/tx/${txid}`);
   const result = await CONNECTION.confirmTransaction({
     blockhash,
     lastValidBlockHeight,

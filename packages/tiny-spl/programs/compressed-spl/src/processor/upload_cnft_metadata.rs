@@ -3,20 +3,19 @@ use anchor_lang::prelude::*;
 use crate::{
     constants::{CNFT_METADATA_SEED, MAX_METADATA_LEN},
     state::CnftMetadata,
-    utils::check_cnft_owner,
+    utils::check_cnft_owner, error::TinySplError,
 };
 
 pub fn upload_cnft_metadata<'info>(
     ctx: Context<'_, '_, '_, 'info, UploadCnftMetadata<'info>>,
+    asset_id: Pubkey,
     root: [u8; 32],
     cnft_metadata: CnftMetadata,
-    nonce: u64,
-    index: u32,
+    index: u64,
 ) -> Result<()> {
-    check_cnft_owner(
+   let calculated_asset_id = check_cnft_owner(
         root,
         &cnft_metadata,
-        nonce,
         index,
         &ctx.accounts.merkle_tree.to_account_info(),
         &ctx.accounts.leaf_owner.to_account_info(),
@@ -24,6 +23,8 @@ pub fn upload_cnft_metadata<'info>(
         &ctx.accounts.compression_program.to_account_info(),
         &ctx.remaining_accounts
     )?;
+
+    require!(calculated_asset_id == asset_id, TinySplError::AssetIdMismatch);
 
     let cnft_metadata = &mut ctx.accounts.cnft_metadata;
     cnft_metadata.name = cnft_metadata.name.clone();

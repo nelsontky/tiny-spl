@@ -1,5 +1,4 @@
 use anchor_lang::prelude::*;
-use mpl_bubblegum::types::{Collection, Creator, TokenProgramVersion, TokenStandard, Uses};
 
 #[account]
 pub struct CnftMetadata {
@@ -16,4 +15,45 @@ pub struct CnftMetadata {
     pub token_program_version: TokenProgramVersion,
     pub creators: Vec<Creator>,
     pub cnft_metadata_account_creator: Pubkey,
+}
+
+#[derive(AnchorDeserialize, AnchorSerialize, Clone)]
+pub enum TokenStandard {
+    NonFungible,
+    FungibleAsset,
+    Fungible,
+    NonFungibleEdition,
+}
+
+#[derive(AnchorDeserialize, AnchorSerialize, Clone)]
+pub enum TokenProgramVersion {
+    Original,
+    Token2022,
+}
+
+#[derive(AnchorDeserialize, AnchorSerialize, Clone)]
+pub struct Collection {
+    pub verified: bool,
+    pub key: Pubkey,
+}
+
+#[derive(AnchorDeserialize, AnchorSerialize, Clone)]
+pub struct Uses {
+    pub use_method: UseMethod,
+    pub remaining: u64,
+    pub total: u64,
+}
+
+#[derive(AnchorDeserialize, AnchorSerialize, Clone)]
+pub enum UseMethod {
+    Burn,
+    Multiple,
+    Single,
+}
+
+#[derive(AnchorDeserialize, AnchorSerialize, Clone)]
+pub struct Creator {
+    pub address: Pubkey,
+    pub verified: bool,
+    pub share: u8,
 }

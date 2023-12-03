@@ -1,43 +1,24 @@
-use anchor_lang::{
-    prelude::*,
-    solana_program::{self, keccak},
-};
-use mpl_bubblegum::{
-    instructions::VerifyLeafInstructionArgs, types::MetadataArgs, utils::get_asset_id,
-};
+use anchor_lang::{prelude::*, solana_program::keccak};
+use mpl_bubblegum::{instructions::VerifyLeafCpiBuilder, types::MetadataArgs, utils::get_asset_id};
 
 use crate::{error::TinySplError, state::CnftMetadata};
 
 pub fn check_cnft_owner<'info>(
     root: [u8; 32],
     cnft_metadata: &CnftMetadata,
-    nonce: u64,
-    index: u32,
+    index: u64,
     merkle_tree: &AccountInfo<'info>,
     owner: &AccountInfo<'info>,
     delegate: &AccountInfo<'info>,
     compression_program: &AccountInfo<'info>,
     remaining_accounts: &[AccountInfo<'info>],
-) -> Result<()> {
+) -> Result<Pubkey> {
     require!(
         owner.is_signer || delegate.is_signer,
         TinySplError::LeafAuthorityMustSign
     );
 
-    let metadata_args = MetadataArgs {
-        name: cnft_metadata.name.clone(),
-        symbol: cnft_metadata.symbol.clone(),
-        uri: cnft_metadata.uri.clone(),
-        collection: cnft_metadata.collection.clone(),
-        creators: cnft_metadata.creators.clone(),
-        edition_nonce: cnft_metadata.edition_nonce,
-        is_mutable: cnft_metadata.is_mutable,
-        primary_sale_happened: cnft_metadata.primary_sale_happened,
-        seller_fee_basis_points: cnft_metadata.seller_fee_basis_points,
-        token_program_version: cnft_metadata.token_program_version.clone(),
-        token_standard: cnft_metadata.token_standard.clone(),
-        uses: cnft_metadata.uses.clone(),
-    };
+    let metadata_args = convert_cnft_metadata_to_metadata_args(cnft_metadata);
     let metadata_args_hash = keccak::hashv(&[metadata_args.try_to_vec()?.as_slice()]);
     let data_hash = keccak::hashv(&[
         &metadata_args_hash.to_bytes(),
@@ -55,26 +36,105 @@ pub fn check_cnft_owner<'info>(
             .collect::<Vec<&[u8]>>()
             .as_ref(),
     );
-    let asset_id = get_asset_id(&merkle_tree.key(), nonce);
+    let asset_id = get_asset_id(&merkle_tree.key(), index);
     let leaf = keccak::hashv(&[
         &[mpl_bubblegum::types::Version::V1.to_bytes()],
         asset_id.as_ref(),
         owner.key().as_ref(),
         delegate.key().as_ref(),
-        nonce.to_le_bytes().as_ref(),
+        index.to_le_bytes().as_ref(),
         data_hash.as_ref(),
         creator_hash.as_ref(),
     ])
     .to_bytes();
 
-    let verify_leaf_ix = mpl_bubblegum::instructions::VerifyLeaf {
-        merkle_tree: merkle_tree.key(),
-    }
-    .instruction(VerifyLeafInstructionArgs { index, leaf, root });
-    let mut account_infos = vec![merkle_tree.clone(), compression_program.clone()];
-    account_infos.extend_from_slice(remaining_accounts);
+    msg!("asset id: {:?}", asset_id);
+    msg!("data hash: {:?}", data_hash);
+    msg!("asset hash: {:?}", leaf);
+    msg!("creator hash: {:?}", creator_hash);
 
-    solana_program::program::invoke(&verify_leaf_ix, account_infos.as_slice())?;
+    let mut verify_leaf_cpi_builder = VerifyLeafCpiBuilder::new(compression_program);
+    verify_leaf_cpi_builder.merkle_tree(merkle_tree);
+    verify_leaf_cpi_builder.root(root);
+    verify_leaf_cpi_builder.leaf(leaf);
+    verify_leaf_cpi_builder.index(index.try_into().unwrap());
+    remaining_accounts.iter().for_each(|a| {
+        verify_leaf_cpi_builder.add_remaining_account(a, false, false);
+    });
+    verify_leaf_cpi_builder.invoke()?;
 
-    Ok(())
+    Ok(asset_id)
+}
+
+fn convert_cnft_metadata_to_metadata_args(cnft_metadata: &CnftMetadata) -> MetadataArgs {
+    let token_program_version = match cnft_metadata.token_program_version {
+        crate::state::TokenProgramVersion::Original => {
+            mpl_bubblegum::types::TokenProgramVersion::Original
+        }
+        crate::state::TokenProgramVersion::Token2022 => {
+            mpl_bubblegum::types::TokenProgramVersion::Token2022
+        }
+    };
+    let token_standard = match &cnft_metadata.token_standard {
+        Some(token_standard) => match token_standard {
+            crate::state::TokenStandard::NonFungible => {
+                Some(mpl_bubblegum::types::TokenStandard::NonFungible)
+            }
+            crate::state::TokenStandard::FungibleAsset => {
+                Some(mpl_bubblegum::types::TokenStandard::FungibleAsset)
+            }
+            crate::state::TokenStandard::Fungible => {
+                Some(mpl_bubblegum::types::TokenStandard::Fungible)
+            }
+            crate::state::TokenStandard::NonFungibleEdition => {
+                Some(mpl_bubblegum::types::TokenStandard::NonFungibleEdition)
+            }
+        },
+        None => None,
+    };
+    let collection = match &cnft_metadata.collection {
+        Some(collection) => Some(mpl_bubblegum::types::Collection {
+            verified: collection.verified,
+            key: collection.key,
+        }),
+        None => None,
+    };
+    let creators = cnft_metadata
+        .creators
+        .iter()
+        .map(|c| mpl_bubblegum::types::Creator {
+            address: c.address,
+            verified: c.verified,
+            share: c.share,
+        })
+        .collect::<Vec<_>>();
+    let uses = match &cnft_metadata.uses {
+        Some(uses) => Some(mpl_bubblegum::types::Uses {
+            use_method: match uses.use_method {
+                crate::state::UseMethod::Burn => mpl_bubblegum::types::UseMethod::Burn,
+                crate::state::UseMethod::Multiple => mpl_bubblegum::types::UseMethod::Multiple,
+                crate::state::UseMethod::Single => mpl_bubblegum::types::UseMethod::Single,
+            },
+            remaining: uses.remaining,
+            total: uses.total,
+        }),
+        None => None,
+    };
+
+    let metadata_args = MetadataArgs {
+        name: cnft_metadata.name.clone(),
+        symbol: cnft_metadata.symbol.clone(),
+        uri: cnft_metadata.uri.clone(),
+        collection,
+        creators,
+        edition_nonce: cnft_metadata.edition_nonce,
+        is_mutable: cnft_metadata.is_mutable,
+        primary_sale_happened: cnft_metadata.primary_sale_happened,
+        seller_fee_basis_points: cnft_metadata.seller_fee_basis_points,
+        token_program_version,
+        token_standard,
+        uses,
+    };
+
+    metadata_args
 }

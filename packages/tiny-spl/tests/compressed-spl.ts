@@ -1,20 +1,32 @@
 import * as anchor from "@coral-xyz/anchor";
-import { PublicKey } from "@solana/web3.js";
+import { AccountMeta, PublicKey } from "@solana/web3.js";
 import {
+  CNFT_METADATA_SEED,
+  CONNECTION,
   PROGRAM,
   SIGNER,
+  SIGNER_OWNED_TOKEN_FOR_TESTING,
   TINY_SPL_AUTHORITY_SEED,
   TOKEN_MINT_KEY,
   TREE_ID,
   WRONG_AUTHORITY,
 } from "../scripts/constants";
-import { PROGRAM_ID as BUBBLEGUM_PROGRAM_ID } from "@metaplex-foundation/mpl-bubblegum";
+import {
+  PROGRAM_ID as BUBBLEGUM_PROGRAM_ID,
+  TokenProgramVersion,
+  TokenStandard,
+  computeDataHash,
+  MetadataArgs,
+  Creator,
+} from "@metaplex-foundation/mpl-bubblegum";
 import {
   PROGRAM_ID as COMPRESSION_PROGRAM_ID,
+  ConcurrentMerkleTreeAccount,
   SPL_NOOP_PROGRAM_ID,
 } from "@solana/spl-account-compression";
 import { assert, expect } from "chai";
 import { sendAndConfirmIxs } from "../scripts/sendAndConfirmIxs";
+import { toMetadataFromReadApiAsset } from "@metaplex-foundation/js";
 
 const mplTokenMetadataProgramId = new PublicKey(
   "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
@@ -125,5 +137,100 @@ describe("tiny-spl", () => {
     ).currentSupply;
 
     assert(currentSupply.eq(prevSupply.add(MINT_COUNT)));
+  });
+
+  it.only("should allow token owner to upload cnft metadata", async () => {
+    const assetProof = await CONNECTION.getAssetProof(
+      SIGNER_OWNED_TOKEN_FOR_TESTING
+    );
+    const asset = await CONNECTION.getAsset(SIGNER_OWNED_TOKEN_FOR_TESTING);
+    const [cnftMetadata] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from(CNFT_METADATA_SEED),
+        SIGNER_OWNED_TOKEN_FOR_TESTING.toBuffer(),
+      ],
+      PROGRAM.programId
+    );
+
+    const treeAccount = await ConcurrentMerkleTreeAccount.fromAccountAddress(
+      CONNECTION,
+      TREE_ID
+    );
+    const canopyDepth = treeAccount.getCanopyDepth();
+
+    // parse the list of proof addresses into a valid AccountMeta[]
+    const proofPath: AccountMeta[] = assetProof.proof
+      .map((node: string) => ({
+        pubkey: new PublicKey(node),
+        isSigner: false,
+        isWritable: false,
+      }))
+      .slice(0, assetProof.proof.length - (!!canopyDepth ? canopyDepth : 0));
+
+    const creators: Creator[] = asset.creators.map((creator) => {
+      return {
+        address: new PublicKey(creator.address),
+        verified: creator.verified,
+        share: creator.share,
+      };
+    });
+    const metadataArgs: MetadataArgs = {
+      name: asset.content.metadata?.name || "",
+      symbol: asset.content.metadata?.symbol || "",
+      uri: asset.content.json_uri,
+      sellerFeeBasisPoints: asset.royalty.basis_points,
+      creators: creators,
+      collection: {
+        key: new PublicKey(asset.grouping[0].group_value),
+        verified: true,
+      },
+      editionNonce: asset.supply.edition_nonce,
+      primarySaleHappened: asset.royalty.primary_sale_happened,
+      isMutable: asset.mutable,
+      uses: null,
+      tokenProgramVersion: { original: {} } as any,
+      tokenStandard: { nonFungible: {} } as any,
+    };
+    console.log(JSON.stringify(metadataArgs, null, 2));
+    console.log(
+      "calculated data hash:",
+      new PublicKey(
+        computeDataHash({
+          ...metadataArgs,
+          tokenProgramVersion: TokenProgramVersion.Original,
+          tokenStandard: TokenStandard.NonFungible,
+        })
+      ).toBase58()
+    );
+    console.log("expected data hash:", asset.compression.data_hash);
+
+    return;
+
+    const ix = await PROGRAM.methods
+      .uploadCnftMetadata(
+        SIGNER_OWNED_TOKEN_FOR_TESTING,
+        [...new PublicKey(assetProof.root.trim()).toBytes()],
+        metadataArgs,
+        new anchor.BN(asset.compression.leaf_id)
+      )
+      .accounts({
+        cnftMetadata,
+        leafOwner: SIGNER.publicKey,
+        leafDelegate: SIGNER.publicKey,
+        cnftMetadataAccountCreator: SIGNER.publicKey,
+        compressionProgram: COMPRESSION_PROGRAM_ID,
+        merkleTree: TREE_ID,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .remainingAccounts(proofPath)
+      .instruction();
+
+    const result = await sendAndConfirmIxs(
+      [ix],
+      SIGNER.publicKey,
+      [SIGNER],
+      true
+    );
+    console.log(result);
   });
 });
