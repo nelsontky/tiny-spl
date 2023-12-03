@@ -15,4 +15,5 @@ pub struct CnftMetadata {
     pub uses: Option<Uses>,
     pub token_program_version: TokenProgramVersion,
     pub creators: Vec<Creator>,
+    pub cnft_metadata_account_creator: Pubkey,
 }

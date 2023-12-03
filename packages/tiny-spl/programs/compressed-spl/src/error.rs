@@ -8,4 +8,6 @@ pub enum TinySplError {
     MetadataAccountNotEmpty,
     #[msg("Master edition account is not empty")]
     MasterEditionAccountNotEmpty,
+    #[msg("Leaf authority must sign")]
+    LeafAuthorityMustSign,
 }
