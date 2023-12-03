@@ -4,7 +4,7 @@ use anchor_lang::solana_program::pubkey::Pubkey;
 
 use crate::noop::Noop;
 use crate::A;
-use crate::{constants::METADATA_BUFFER_START, state::Metadata};
+use crate::{constants::METADATA_BUFFER_START, state::LoggingMetadata};
 
 const MAX_CPI_BYTES: usize = 1238;
 
@@ -36,7 +36,7 @@ pub struct LogMetadata<'info> {
     #[account(
         has_one = authority,
     )]
-    pub metadata: Account<'info, Metadata>,
+    pub metadata: Account<'info, LoggingMetadata>,
     pub authority: Signer<'info>,
     pub noop_program: Program<'info, Noop>,
 }

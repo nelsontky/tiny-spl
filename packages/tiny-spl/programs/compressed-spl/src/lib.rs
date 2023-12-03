@@ -16,14 +16,14 @@ pub mod tiny_spl {
     use super::*;
 
     pub fn init_metadata_account(
-        ctx: Context<InitMetadataAccount>,
+        ctx: Context<InitLoggingMetadataAccount>,
         total_metadata_bytes: u32,
     ) -> Result<()> {
-        processor::init_metadata_account(ctx, total_metadata_bytes)
+        processor::init_logging_metadata_account(ctx, total_metadata_bytes)
     }
 
-    pub fn upload_metadata(ctx: Context<UploadMetadata>, index: u32, bytes: Vec<u8>) -> Result<()> {
-        processor::upload_metadata(ctx, index, bytes)
+    pub fn upload_logging_metadata(ctx: Context<UploadLoggingMetadata>, index: u32, bytes: Vec<u8>) -> Result<()> {
+        processor::upload_logging_metadata(ctx, index, bytes)
     }
 
     pub fn log_metadata(ctx: Context<LogMetadata>) -> Result<()> {
@@ -49,6 +49,9 @@ pub mod tiny_spl {
 #[derive(Accounts)]
 pub struct Initialize {}
 
+// same as default solana bump allocator
+// this is needed so I can mess with the heap
+// when I make logging cpis
 pub struct BumpAllocator {
     pub start: usize,
     pub len: usize,

@@ -1,7 +1,11 @@
-use crate::{constants::METADATA_BUFFER_START, state::Metadata};
+use crate::{constants::METADATA_BUFFER_START, state::LoggingMetadata};
 use anchor_lang::prelude::*;
 
-pub fn upload_metadata(ctx: Context<UploadMetadata>, index: u32, bytes: Vec<u8>) -> Result<()> {
+pub fn upload_logging_metadata(
+    ctx: Context<UploadLoggingMetadata>,
+    index: u32,
+    bytes: Vec<u8>,
+) -> Result<()> {
     let account_info = ctx.accounts.metadata.to_account_info();
     let mut account_data = account_info.data.borrow_mut();
     account_data[METADATA_BUFFER_START + (index as usize)
@@ -11,11 +15,11 @@ pub fn upload_metadata(ctx: Context<UploadMetadata>, index: u32, bytes: Vec<u8>)
 }
 
 #[derive(Accounts)]
-pub struct UploadMetadata<'info> {
+pub struct UploadLoggingMetadata<'info> {
     #[account(
         mut,
         has_one = authority,
     )]
-    pub metadata: Account<'info, Metadata>,
+    pub metadata: Account<'info, LoggingMetadata>,
     pub authority: Signer<'info>,
 }

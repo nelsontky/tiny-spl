@@ -1,12 +1,15 @@
 use anchor_lang::{prelude::*, Discriminator};
 
-use crate::{constants::METADATA_BUFFER_START, state::Metadata};
+use crate::{constants::METADATA_BUFFER_START, state::LoggingMetadata};
 
-pub fn init_metadata_account(ctx: Context<InitMetadataAccount>, _total_metadata_bytes: u32) -> Result<()> {
-    let metadata = Metadata {
+pub fn init_logging_metadata_account(
+    ctx: Context<InitLoggingMetadataAccount>,
+    _total_metadata_bytes: u32,
+) -> Result<()> {
+    let metadata = LoggingMetadata {
         authority: ctx.accounts.authority.key(),
     };
-    let mut struct_data = Metadata::discriminator().try_to_vec().unwrap();
+    let mut struct_data = LoggingMetadata::discriminator().try_to_vec().unwrap();
     struct_data.append(&mut metadata.try_to_vec().unwrap());
 
     let metadata_account = &mut ctx.accounts.metadata;
@@ -19,7 +22,7 @@ pub fn init_metadata_account(ctx: Context<InitMetadataAccount>, _total_metadata_
 
 #[derive(Accounts)]
 #[instruction(total_metadata_bytes: u32)]
-pub struct InitMetadataAccount<'info> {
+pub struct InitLoggingMetadataAccount<'info> {
     /// CHECK: account constraints checked in account trait
     #[account(
         zero,

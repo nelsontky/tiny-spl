@@ -14,25 +14,15 @@ const MAX_SYMBOL_LENGTH: usize = 10;
 
 const MAX_URI_LENGTH: usize = 200;
 
-const MAX_DATA_SIZE: usize = 4
-    + MAX_NAME_LENGTH
-    + 4
-    + MAX_SYMBOL_LENGTH
-    + 4
-    + MAX_URI_LENGTH
-    + 2 // seller fee basis points
-    + 1
-    + 4
-    + MAX_CREATOR_LIMIT * MAX_CREATOR_LEN;
-
-pub const MAX_METADATA_LEN: usize = 1 // key
-+ 32             // update auth pubkey
-+ 32             // mint pubkey
-+ MAX_DATA_SIZE
-+ 1              // primary sale
-+ 1              // mutable
-+ 2              // nonce (pretty sure this only needs to be 2)
-+ 2              // token standard
-+ 34             // collection
-+ 18             // uses
-+ 1 + 1; // token_program_version
+pub const MAX_METADATA_LEN: usize = 4 + MAX_NAME_LENGTH
+    + 4 + MAX_SYMBOL_LENGTH
+    + 4 + MAX_URI_LENGTH
+    + 2                                        // seller fee basis points
+    + 1                                        // primary sale happened
+    + 1                                        // is mutable
+    + 2                                        // nonce
+    + 2                                        // token standard
+    + 34                                       // collection
+    + 18                                       // uses
+    + 1 + 1                                    // token_program_version
+    + 4 + MAX_CREATOR_LIMIT * MAX_CREATOR_LEN;
