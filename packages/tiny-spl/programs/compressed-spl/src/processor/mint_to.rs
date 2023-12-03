@@ -136,8 +136,8 @@ pub struct MintTo<'info> {
     /// CHECK: This account is neither written to nor read from.
     pub leaf_delegate: AccountInfo<'info>,
     #[account(mut)]
-    /// CHECK: unsafe
-    pub merkle_tree: UncheckedAccount<'info>, // TODO: ensure that tree delegate is None and tree_authority is tiny_spl_authority, currently not enforced to simplify testing
+    /// CHECK: checked in cpi to account compression
+    pub merkle_tree: UncheckedAccount<'info>,
     pub mint_authority: Signer<'info>,
     /// CHECK: checked in cpi to bubblegum
     pub collection_mint: UncheckedAccount<'info>,
@@ -156,7 +156,7 @@ pub struct MintTo<'info> {
         ],
         bump,
         constraint = tiny_spl_authority.is_verified_tiny_spl_mint
-            && tiny_spl_authority.mint_authority == Some(*mint_authority.key)
+            && tiny_spl_authority.mint_authority == Some(mint_authority.key())
     )]
     pub tiny_spl_authority: Box<Account<'info, TinySplAuthority>>,
     /// CHECK: checked in cpi to bubblegum
