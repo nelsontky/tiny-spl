@@ -1,5 +1,5 @@
 use anchor_lang::{prelude::*, solana_program::keccak};
-use mpl_bubblegum::{instructions::VerifyLeafCpiBuilder, types::MetadataArgs, utils::get_asset_id};
+use mpl_bubblegum::{instructions::VerifyLeafCpiBuilder, utils::get_asset_id};
 
 use crate::{error::TinySplError, state::CnftMetadata};
 
@@ -48,11 +48,6 @@ pub fn check_cnft_owner<'info>(
     ])
     .to_bytes();
 
-    msg!("asset id: {:?}", asset_id);
-    msg!("data hash: {:?}", data_hash);
-    msg!("asset hash: {:?}", leaf);
-    msg!("creator hash: {:?}", creator_hash);
-
     let mut verify_leaf_cpi_builder = VerifyLeafCpiBuilder::new(compression_program);
     verify_leaf_cpi_builder.merkle_tree(merkle_tree);
     verify_leaf_cpi_builder.root(root);
@@ -66,7 +61,9 @@ pub fn check_cnft_owner<'info>(
     Ok(asset_id)
 }
 
-fn convert_cnft_metadata_to_metadata_args(cnft_metadata: &CnftMetadata) -> MetadataArgs {
+fn convert_cnft_metadata_to_metadata_args(
+    cnft_metadata: &CnftMetadata,
+) -> mpl_bubblegum::types::MetadataArgs {
     let token_program_version = match cnft_metadata.token_program_version {
         crate::state::TokenProgramVersion::Original => {
             mpl_bubblegum::types::TokenProgramVersion::Original
@@ -121,7 +118,7 @@ fn convert_cnft_metadata_to_metadata_args(cnft_metadata: &CnftMetadata) -> Metad
         None => None,
     };
 
-    let metadata_args = MetadataArgs {
+    let metadata_args = mpl_bubblegum::types::MetadataArgs {
         name: cnft_metadata.name.clone(),
         symbol: cnft_metadata.symbol.clone(),
         uri: cnft_metadata.uri.clone(),

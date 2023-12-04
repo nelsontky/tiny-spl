@@ -191,20 +191,6 @@ describe("tiny-spl", () => {
       tokenProgramVersion: { original: {} } as any,
       tokenStandard: { nonFungible: {} } as any,
     };
-    console.log(JSON.stringify(metadataArgs, null, 2));
-    console.log(
-      "calculated data hash:",
-      new PublicKey(
-        computeDataHash({
-          ...metadataArgs,
-          tokenProgramVersion: TokenProgramVersion.Original,
-          tokenStandard: TokenStandard.NonFungible,
-        })
-      ).toBase58()
-    );
-    console.log("expected data hash:", asset.compression.data_hash);
-
-    return;
 
     const ix = await PROGRAM.methods
       .uploadCnftMetadata(

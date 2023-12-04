@@ -95,9 +95,9 @@ fn mint_tiny_nft_to_collection<'info>(
     .instruction(
         mpl_bubblegum::instructions::MintToCollectionV1InstructionArgs {
             metadata: mpl_bubblegum::types::MetadataArgs {
-                name: metadata_args.name,
-                symbol: metadata_args.symbol,
-                uri: metadata_args.uri,
+                name: metadata_args.name.replace("\0", ""),
+                symbol: metadata_args.symbol.replace("\0", ""),
+                uri: metadata_args.uri.clone(),
                 seller_fee_basis_points: 0,
                 primary_sale_happened: false,
                 is_mutable: true,
