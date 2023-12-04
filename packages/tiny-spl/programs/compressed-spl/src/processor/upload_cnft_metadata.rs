@@ -1,9 +1,9 @@
 use anchor_lang::prelude::*;
 
 use crate::{
-    constants::{CNFT_METADATA_SEED, MAX_METADATA_LEN},
-    state::CnftMetadata,
-    utils::check_cnft_owner, error::TinySplError,
+    constants::{CNFT_METADATA_SEED, MAX_METADATA_LEN, TINY_SPL_AUTHORITY_SEED},
+    state::{CnftMetadata, TinySplAuthority},
+    utils::check_cnft, error::TinySplError,
 };
 
 pub fn upload_cnft_metadata<'info>(
@@ -13,13 +13,14 @@ pub fn upload_cnft_metadata<'info>(
     cnft_metadata: CnftMetadata,
     index: u64,
 ) -> Result<()> {
-   let calculated_asset_id = check_cnft_owner(
+   let calculated_asset_id = check_cnft(
         root,
         &cnft_metadata,
         index,
         &ctx.accounts.merkle_tree.to_account_info(),
         &ctx.accounts.leaf_owner.to_account_info(),
         &ctx.accounts.leaf_delegate.to_account_info(),
+        &ctx.accounts.collection_mint.to_account_info(),
         &ctx.accounts.compression_program.to_account_info(),
         &ctx.remaining_accounts
     )?;
@@ -68,6 +69,17 @@ pub struct UploadCnftMetadata<'info> {
             || cnft_metadata_account_creator.key() == leaf_delegate.key())
     ]
     pub cnft_metadata_account_creator: Signer<'info>,
+    /// CHECK: only used to verify tiny_spl_authority seeds
+    pub collection_mint: UncheckedAccount<'info>,
+    #[account(
+        seeds = [
+            TINY_SPL_AUTHORITY_SEED,
+            collection_mint.key().as_ref(),
+        ],
+        bump,
+        constraint = tiny_spl_authority.is_verified_tiny_spl_mint
+    )]
+    pub tiny_spl_authority: Box<Account<'info, TinySplAuthority>>,
     /// CHECK: This account is checked in cpi
     pub merkle_tree: UncheckedAccount<'info>,
     pub system_program: Program<'info, System>,

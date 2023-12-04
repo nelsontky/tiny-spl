@@ -13,26 +13,30 @@ export const sendAndConfirmIxs = async (
   signers: Keypair[],
   skipPreflight = false
 ) => {
-  const { blockhash, lastValidBlockHeight } =
-    await CONNECTION.getLatestBlockhash();
+  try {
+    const { blockhash, lastValidBlockHeight } =
+      await CONNECTION.getLatestBlockhash();
 
-  const messageV0 = new TransactionMessage({
-    payerKey,
-    recentBlockhash: blockhash,
-    instructions: ixs,
-  }).compileToV0Message();
-  const transaction = new VersionedTransaction(messageV0);
+    const messageV0 = new TransactionMessage({
+      payerKey,
+      recentBlockhash: blockhash,
+      instructions: ixs,
+    }).compileToV0Message();
+    const transaction = new VersionedTransaction(messageV0);
 
-  transaction.sign(signers);
-  const txid = await CONNECTION.sendTransaction(transaction, {
-    skipPreflight,
-  });
-  console.log(`https://solscan.io/tx/${txid}`);
-  const result = await CONNECTION.confirmTransaction({
-    blockhash,
-    lastValidBlockHeight,
-    signature: txid,
-  });
+    transaction.sign(signers);
+    const txid = await CONNECTION.sendTransaction(transaction, {
+      skipPreflight,
+    });
+    console.log(`https://solscan.io/tx/${txid}`);
+    const result = await CONNECTION.confirmTransaction({
+      blockhash,
+      lastValidBlockHeight,
+      signature: txid,
+    });
 
-  return result;
+    return result;
+  } catch (e) {
+    return { value: { err: e } };
+  }
 };

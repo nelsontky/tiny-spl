@@ -5,6 +5,8 @@ import {
   CONNECTION,
   PROGRAM,
   SIGNER,
+  SIGNER_OWNED_INVALID_TOKEN_FOR_TESTING,
+  SIGNER_OWNED_SPOOFED_COLLECTION_TOKEN_FOR_TESTING,
   SIGNER_OWNED_TOKEN_FOR_TESTING,
   TINY_SPL_AUTHORITY_SEED,
   TOKEN_MINT_KEY,
@@ -139,7 +141,189 @@ describe("tiny-spl", () => {
     assert(currentSupply.eq(prevSupply.add(MINT_COUNT)));
   });
 
-  it.only("should allow token owner to upload cnft metadata", async () => {
+  it("should not allow token owner to upload cnft metadata with a spoofed collection id", async () => {
+    const assetProof = await CONNECTION.getAssetProof(
+      SIGNER_OWNED_SPOOFED_COLLECTION_TOKEN_FOR_TESTING
+    );
+    const asset = await CONNECTION.getAsset(
+      SIGNER_OWNED_SPOOFED_COLLECTION_TOKEN_FOR_TESTING
+    );
+    const [cnftMetadata] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from(CNFT_METADATA_SEED),
+        SIGNER_OWNED_SPOOFED_COLLECTION_TOKEN_FOR_TESTING.toBuffer(),
+      ],
+      PROGRAM.programId
+    );
+
+    const treeAccount = await ConcurrentMerkleTreeAccount.fromAccountAddress(
+      CONNECTION,
+      TREE_ID
+    );
+    const canopyDepth = treeAccount.getCanopyDepth();
+
+    // parse the list of proof addresses into a valid AccountMeta[]
+    const proofPath: AccountMeta[] = assetProof.proof
+      .map((node: string) => ({
+        pubkey: new PublicKey(node),
+        isSigner: false,
+        isWritable: false,
+      }))
+      .slice(0, assetProof.proof.length - (!!canopyDepth ? canopyDepth : 0));
+
+    const creators: Creator[] = asset.creators.map((creator) => {
+      return {
+        address: new PublicKey(creator.address),
+        verified: creator.verified,
+        share: creator.share,
+      };
+    });
+    const metadataArgs: MetadataArgs = {
+      name: asset.content.metadata?.name || "",
+      symbol: asset.content.metadata?.symbol || "",
+      uri: asset.content.json_uri,
+      sellerFeeBasisPoints: asset.royalty.basis_points,
+      creators: creators,
+      collection: {
+        key: new PublicKey(asset.grouping[0].group_value),
+        verified: true,
+      },
+      editionNonce: asset.supply.edition_nonce,
+      primarySaleHappened: asset.royalty.primary_sale_happened,
+      isMutable: asset.mutable,
+      uses: null,
+      tokenProgramVersion: { original: {} } as any,
+      tokenStandard: { nonFungible: {} } as any,
+    };
+
+    const ix = await PROGRAM.methods
+      .uploadCnftMetadata(
+        SIGNER_OWNED_SPOOFED_COLLECTION_TOKEN_FOR_TESTING,
+        [...new PublicKey(assetProof.root.trim()).toBytes()],
+        metadataArgs,
+        new anchor.BN(asset.compression.leaf_id)
+      )
+      .accounts({
+        cnftMetadata,
+        leafOwner: SIGNER.publicKey,
+        leafDelegate: SIGNER.publicKey,
+        cnftMetadataAccountCreator: SIGNER.publicKey,
+        compressionProgram: COMPRESSION_PROGRAM_ID,
+        collectionMint: mint,
+        tinySplAuthority,
+        merkleTree: TREE_ID,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .remainingAccounts(proofPath)
+      .instruction();
+
+    const result = await sendAndConfirmIxs(
+      [ix],
+      SIGNER.publicKey,
+      [SIGNER],
+      true
+    );
+
+    const errorCode = (result.value?.err as any).InstructionError[1].Custom;
+    expect(errorCode).to.equal(6004);
+  });
+
+  it("should not allow token owner to upload invalid token metadata that is under an invalid collection", async () => {
+    const assetProof = await CONNECTION.getAssetProof(
+      SIGNER_OWNED_INVALID_TOKEN_FOR_TESTING
+    );
+    const asset = await CONNECTION.getAsset(
+      SIGNER_OWNED_INVALID_TOKEN_FOR_TESTING
+    );
+    const [cnftMetadata] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from(CNFT_METADATA_SEED),
+        SIGNER_OWNED_INVALID_TOKEN_FOR_TESTING.toBuffer(),
+      ],
+      PROGRAM.programId
+    );
+
+    const treeAccount = await ConcurrentMerkleTreeAccount.fromAccountAddress(
+      CONNECTION,
+      TREE_ID
+    );
+    const canopyDepth = treeAccount.getCanopyDepth();
+
+    // parse the list of proof addresses into a valid AccountMeta[]
+    const proofPath: AccountMeta[] = assetProof.proof
+      .map((node: string) => ({
+        pubkey: new PublicKey(node),
+        isSigner: false,
+        isWritable: false,
+      }))
+      .slice(0, assetProof.proof.length - (!!canopyDepth ? canopyDepth : 0));
+
+    const creators: Creator[] = asset.creators.map((creator) => {
+      return {
+        address: new PublicKey(creator.address),
+        verified: creator.verified,
+        share: creator.share,
+      };
+    });
+    const metadataArgs: MetadataArgs = {
+      name: asset.content.metadata?.name || "",
+      symbol: asset.content.metadata?.symbol || "",
+      uri: asset.content.json_uri,
+      sellerFeeBasisPoints: asset.royalty.basis_points,
+      creators: creators,
+      collection: {
+        key: new PublicKey(asset.grouping[0].group_value),
+        verified: true,
+      },
+      editionNonce: asset.supply.edition_nonce,
+      primarySaleHappened: asset.royalty.primary_sale_happened,
+      isMutable: asset.mutable,
+      uses: null,
+      tokenProgramVersion: { original: {} } as any,
+      tokenStandard: { nonFungible: {} } as any,
+    };
+
+    const [tinySplAuthority] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from(TINY_SPL_AUTHORITY_SEED),
+        new PublicKey(asset.grouping[0].group_value).toBuffer(),
+      ],
+      PROGRAM.programId
+    );
+
+    const ix = await PROGRAM.methods
+      .uploadCnftMetadata(
+        SIGNER_OWNED_INVALID_TOKEN_FOR_TESTING,
+        [...new PublicKey(assetProof.root.trim()).toBytes()],
+        metadataArgs,
+        new anchor.BN(asset.compression.leaf_id)
+      )
+      .accounts({
+        cnftMetadata,
+        leafOwner: SIGNER.publicKey,
+        leafDelegate: SIGNER.publicKey,
+        cnftMetadataAccountCreator: SIGNER.publicKey,
+        compressionProgram: COMPRESSION_PROGRAM_ID,
+        collectionMint: new PublicKey(asset.grouping[0].group_value),
+        tinySplAuthority,
+        merkleTree: TREE_ID,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .remainingAccounts(proofPath)
+      .instruction();
+
+    const result = await sendAndConfirmIxs(
+      [ix],
+      SIGNER.publicKey,
+      [SIGNER],
+      true
+    );
+
+    const errorCode = (result.value?.err as any).InstructionError[1].Custom;
+    expect(errorCode).to.equal(3012);
+  });
+
+  it("should allow token owner to upload cnft metadata for a valid token", async () => {
     const assetProof = await CONNECTION.getAssetProof(
       SIGNER_OWNED_TOKEN_FOR_TESTING
     );
@@ -205,6 +389,8 @@ describe("tiny-spl", () => {
         leafDelegate: SIGNER.publicKey,
         cnftMetadataAccountCreator: SIGNER.publicKey,
         compressionProgram: COMPRESSION_PROGRAM_ID,
+        collectionMint: mint,
+        tinySplAuthority,
         merkleTree: TREE_ID,
         systemProgram: anchor.web3.SystemProgram.programId,
       })

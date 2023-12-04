@@ -10,6 +10,8 @@ pub enum TinySplError {
     MasterEditionAccountNotEmpty,
     #[msg("Leaf authority must sign")]
     LeafAuthorityMustSign,
+    #[msg("Passed in collection mint does not match the collection mint of token")]
+    CollectionMismatch,
     #[msg("Passed in asset id does not match the asset id derived from the merkle tree and index")]
     AssetIdMismatch,
 }

@@ -3,19 +3,24 @@ use mpl_bubblegum::{instructions::VerifyLeafCpiBuilder, utils::get_asset_id};
 
 use crate::{error::TinySplError, state::CnftMetadata};
 
-pub fn check_cnft_owner<'info>(
+pub fn check_cnft<'info>(
     root: [u8; 32],
     cnft_metadata: &CnftMetadata,
     index: u64,
     merkle_tree: &AccountInfo<'info>,
     owner: &AccountInfo<'info>,
     delegate: &AccountInfo<'info>,
+    collection_mint: &AccountInfo<'info>,
     compression_program: &AccountInfo<'info>,
     remaining_accounts: &[AccountInfo<'info>],
 ) -> Result<Pubkey> {
     require!(
         owner.is_signer || delegate.is_signer,
         TinySplError::LeafAuthorityMustSign
+    );
+    require!(
+        cnft_metadata.collection.clone().unwrap().key == collection_mint.key(),
+        TinySplError::CollectionMismatch
     );
 
     let metadata_args = convert_cnft_metadata_to_metadata_args(cnft_metadata);
