@@ -14,4 +14,6 @@ pub enum TinySplError {
     CollectionMismatch,
     #[msg("Passed in asset id does not match the asset id derived from the merkle tree and index")]
     AssetIdMismatch,
+    #[msg("Invalid split amounts supplied")]
+    InvalidSplitAmounts,
 }

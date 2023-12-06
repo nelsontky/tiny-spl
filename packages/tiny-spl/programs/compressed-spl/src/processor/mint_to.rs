@@ -1,7 +1,11 @@
-use anchor_lang::{prelude::*, solana_program, system_program};
+use anchor_lang::prelude::*;
 use anchor_spl::metadata::mpl_token_metadata;
 
-use crate::{constants::TINY_SPL_AUTHORITY_SEED, state::TinySplAuthority};
+use crate::{
+    constants::TINY_SPL_AUTHORITY_SEED,
+    state::TinySplAuthority,
+    utils::{get_mint_tiny_spl_args, mint_tiny_spl_to_collection, MintTinySplToCollection},
+};
 
 pub fn mint_to(ctx: Context<MintTo>, amount: u64) -> Result<()> {
     let collection_metadata = mpl_token_metadata::accounts::Metadata::safe_deserialize(
@@ -21,7 +25,7 @@ pub fn mint_to(ctx: Context<MintTo>, amount: u64) -> Result<()> {
     ]];
     let cpi_context = CpiContext::new_with_signer(
         ctx.accounts.mpl_bubblegum_program.to_account_info(),
-        MintTinyNftToCollection {
+        MintTinySplToCollection {
             tree_config: ctx.accounts.tree_authority.to_account_info(),
             leaf_owner: ctx.accounts.leaf_owner.to_account_info(),
             leaf_delegate: ctx.accounts.leaf_delegate.to_account_info(),
@@ -34,31 +38,17 @@ pub fn mint_to(ctx: Context<MintTo>, amount: u64) -> Result<()> {
             tiny_spl_authority: ctx.accounts.tiny_spl_authority.to_account_info(),
             log_wrapper: ctx.accounts.log_wrapper.to_account_info(),
             compression_program: ctx.accounts.compression_program.to_account_info(),
+            system_program: ctx.accounts.system_program.to_account_info(),
+            token_metadata_program: ctx.accounts.token_metadata_program.to_account_info(),
         },
         &seeds,
     );
 
     let collection_mint = ctx.accounts.collection_mint.key().to_string();
     let symbol = collection_metadata.symbol;
-    let formatted_amount = amount
-        .to_string()
-        .as_bytes()
-        .rchunks(3)
-        .rev()
-        .map(std::str::from_utf8)
-        .flat_map(|x| x)
-        .collect::<Vec<_>>()
-        .join(",");
-
-    mint_tiny_nft_to_collection(
+    mint_tiny_spl_to_collection(
         cpi_context,
-        MetadataArgs {
-            name: format!("{formatted_amount} {symbol}"),
-            symbol,
-            uri: format!(
-                "https://metadata.tinys.pl/collection?id={collection_mint}&amount={amount}"
-            ),
-        },
+        get_mint_tiny_spl_args(symbol, amount, collection_mint),
     )?;
 
     let tiny_spl_authority = &mut ctx.accounts.tiny_spl_authority;
@@ -69,63 +59,6 @@ pub fn mint_to(ctx: Context<MintTo>, amount: u64) -> Result<()> {
 
     Ok(())
 }
-
-fn mint_tiny_nft_to_collection<'info>(
-    ctx: CpiContext<'_, '_, '_, 'info, MintTinyNftToCollection<'info>>,
-    metadata_args: MetadataArgs,
-) -> Result<()> {
-    let ix = mpl_bubblegum::instructions::MintToCollectionV1 {
-        tree_config: *ctx.accounts.tree_config.key,
-        leaf_owner: *ctx.accounts.leaf_owner.key,
-        leaf_delegate: *ctx.accounts.leaf_delegate.key,
-        merkle_tree: *ctx.accounts.merkle_tree.key,
-        payer: *ctx.accounts.payer.key,
-        tree_creator_or_delegate: ctx.accounts.tiny_spl_authority.key(),
-        collection_authority: ctx.accounts.tiny_spl_authority.key(),
-        collection_authority_record_pda: None,
-        collection_mint: *ctx.accounts.collection_mint.key,
-        collection_metadata: *ctx.accounts.collection_metadata.key,
-        collection_edition: *ctx.accounts.collection_edition.key,
-        bubblegum_signer: *ctx.accounts.bubblegum_signer.key,
-        log_wrapper: *ctx.accounts.log_wrapper.key,
-        compression_program: *ctx.accounts.compression_program.key,
-        token_metadata_program: mpl_token_metadata::ID,
-        system_program: system_program::ID,
-    }
-    .instruction(
-        mpl_bubblegum::instructions::MintToCollectionV1InstructionArgs {
-            metadata: mpl_bubblegum::types::MetadataArgs {
-                name: metadata_args.name.replace("\0", ""),
-                symbol: metadata_args.symbol.replace("\0", ""),
-                uri: metadata_args.uri.clone(),
-                seller_fee_basis_points: 0,
-                primary_sale_happened: false,
-                is_mutable: true,
-                edition_nonce: None,
-                token_standard: Some(mpl_bubblegum::types::TokenStandard::NonFungible),
-                collection: Some(mpl_bubblegum::types::Collection {
-                    key: ctx.accounts.collection_mint.key(),
-                    verified: true,
-                }),
-                uses: None,
-                token_program_version: mpl_bubblegum::types::TokenProgramVersion::Original,
-                creators: vec![mpl_bubblegum::types::Creator {
-                    address: ctx.accounts.tiny_spl_authority.key(),
-                    verified: true,
-                    share: 100,
-                }],
-            },
-        },
-    );
-
-    solana_program::program::invoke_signed(
-        &ix,
-        &ToAccountInfos::to_account_infos(&ctx),
-        ctx.signer_seeds,
-    )
-    .map_err(Into::into)
-}
-
 #[derive(Accounts)]
 pub struct MintTo<'info> {
     #[account(mut)]
@@ -171,39 +104,4 @@ pub struct MintTo<'info> {
     )]
     /// CHECK: checked in account constraint
     pub mpl_bubblegum_program: AccountInfo<'info>,
-}
-
-#[derive(Accounts)]
-pub struct MintTinyNftToCollection<'info> {
-    /// CHECK: checked in cpi to bubblegum
-    pub tree_config: AccountInfo<'info>,
-    /// CHECK: checked in cpi to bubblegum
-    pub leaf_owner: AccountInfo<'info>,
-    /// CHECK: checked in cpi to bubblegum
-    pub leaf_delegate: AccountInfo<'info>,
-    /// CHECK: checked in cpi to bubblegum
-    pub merkle_tree: AccountInfo<'info>,
-    /// CHECK: checked in cpi to bubblegum
-    pub payer: AccountInfo<'info>,
-    /// CHECK: checked in cpi to bubblegum
-    pub collection_mint: AccountInfo<'info>,
-    /// CHECK: checked in cpi to bubblegum
-    pub collection_metadata: AccountInfo<'info>,
-    /// CHECK: checked in cpi to bubblegum
-    pub collection_edition: AccountInfo<'info>,
-    /// CHECK: checked in cpi to bubblegum
-    pub bubblegum_signer: AccountInfo<'info>,
-    /// CHECK: checked in cpi to bubblegum
-    pub tiny_spl_authority: AccountInfo<'info>,
-    /// CHECK: checked in cpi to bubblegum
-    pub log_wrapper: AccountInfo<'info>,
-    /// CHECK: checked in cpi to bubblegum
-    pub compression_program: AccountInfo<'info>,
-}
-
-#[derive(AnchorSerialize, AnchorDeserialize)]
-pub struct MetadataArgs {
-    name: String,
-    symbol: String,
-    uri: String,
 }
