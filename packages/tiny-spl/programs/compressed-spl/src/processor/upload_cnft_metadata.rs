@@ -85,7 +85,7 @@ pub struct UploadCnftMetadata<'info> {
     /// CHECK: This account is checked in cpi
     pub merkle_tree: UncheckedAccount<'info>,
     pub system_program: Program<'info, System>,
-    /// CHECK: This account is checked in account constraint
     #[account(address = spl_account_compression::id())]
+    /// CHECK: This account is checked in account constraint
     pub compression_program: UncheckedAccount<'info>,
 }

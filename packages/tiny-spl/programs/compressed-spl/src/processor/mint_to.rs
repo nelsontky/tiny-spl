@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_spl::metadata::mpl_token_metadata;
+use anchor_spl::metadata::{mpl_token_metadata, Metadata};
 
 use crate::{
     constants::TINY_SPL_AUTHORITY_SEED,
@@ -91,10 +91,12 @@ pub struct MintTo<'info> {
     )]
     pub tiny_spl_authority: Box<Account<'info, TinySplAuthority>>,
     pub log_wrapper: Program<'info, Noop>,
-    /// CHECK: checked in cpi to bubblegum
+    #[account(
+        address = spl_account_compression::ID
+    )]
+    /// CHECK: checked in account constraint
     pub compression_program: AccountInfo<'info>,
-    /// CHECK: checked in cpi to bubblegum
-    pub token_metadata_program: AccountInfo<'info>,
+    pub token_metadata_program: Program<'info, Metadata>,
     pub system_program: Program<'info, System>,
     #[account(
         address = mpl_bubblegum::ID

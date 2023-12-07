@@ -1,10 +1,10 @@
 use anchor_lang::{prelude::*, solana_program};
-use anchor_spl::metadata::mpl_token_metadata;
-
-use crate::{
-    constants::TINY_SPL_AUTHORITY_SEED, error::TinySplError,
-    state::TinySplAuthority,
+use anchor_spl::{
+    metadata::{mpl_token_metadata, Metadata},
+    token::Token,
 };
+
+use crate::{constants::TINY_SPL_AUTHORITY_SEED, error::TinySplError, state::TinySplAuthority};
 
 pub fn create_mint(
     ctx: Context<CreateMint>,
@@ -123,17 +123,12 @@ pub struct CreateMint<'info> {
         bump,
     )]
     pub tiny_spl_authority: Box<Account<'info, TinySplAuthority>>,
-    /// CHECK: checked in cpi to mpl token metadata
-    pub system_program: UncheckedAccount<'info>,
-    /// CHECK: checked in cpi to mpl token metadata
+    pub system_program: Program<'info, System>,
+    #[account(address = Pubkey::try_from("Sysvar1nstructions1111111111111111111111111").unwrap())]
+    /// CHECK: This account is checked in account constraint
     pub sysvar_instructions: UncheckedAccount<'info>,
-    /// CHECK: checked in cpi to mpl token metadata
-    pub spl_token_program: UncheckedAccount<'info>,
-    #[account(
-        address = mpl_token_metadata::programs::MPL_TOKEN_METADATA_ID
-    )]
-    /// CHECK: checked in account constraint
-    pub mpl_token_metadata_program: AccountInfo<'info>,
+    pub spl_token_program: Program<'info, Token>,
+    pub mpl_token_metadata_program: Program<'info, Metadata>,
 }
 
 #[derive(Accounts)]

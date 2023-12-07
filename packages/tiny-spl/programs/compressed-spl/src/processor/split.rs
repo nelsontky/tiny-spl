@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_spl::metadata::mpl_token_metadata;
+use anchor_spl::metadata::{mpl_token_metadata, Metadata};
 
 use crate::{
     constants::{CNFT_METADATA_SEED, TINY_SPL_AUTHORITY_SEED},
@@ -171,8 +171,8 @@ pub struct Transfer<'info> {
     /// CHECK: This account is checked in cpi
     #[account(mut)]
     pub merkle_tree: UncheckedAccount<'info>,
-    /// CHECK: This account is checked in account constraint
     #[account(address = spl_account_compression::id())]
+    /// CHECK: This account is checked in account constraint
     pub compression_program: UncheckedAccount<'info>,
     #[account(
         address = mpl_bubblegum::ID
@@ -181,6 +181,5 @@ pub struct Transfer<'info> {
     pub mpl_bubblegum_program: UncheckedAccount<'info>,
     pub log_wrapper: Program<'info, Noop>,
     pub system_program: Program<'info, System>,
-    /// CHECK: checked in cpi to bubblegum
-    pub token_metadata_program: AccountInfo<'info>,
+    pub token_metadata_program: Program<'info, Metadata>,
 }
