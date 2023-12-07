@@ -6,14 +6,15 @@ use crate::{error::TinySplError, state::CnftMetadata};
 pub fn check_cnft<'info>(
     root: [u8; 32],
     cnft_metadata: &CnftMetadata,
-    index: u64,
+    nonce: u64,
+    index: u32,
     merkle_tree: &AccountInfo<'info>,
     owner: &AccountInfo<'info>,
     delegate: &AccountInfo<'info>,
     collection_mint: &AccountInfo<'info>,
     compression_program: &AccountInfo<'info>,
     remaining_accounts: &[AccountInfo<'info>],
-) -> Result<Pubkey> {
+) -> Result<(Pubkey, [u8; 32], [u8; 32])> {
     require!(
         owner.is_signer || delegate.is_signer,
         TinySplError::LeafAuthorityMustSign
@@ -41,13 +42,13 @@ pub fn check_cnft<'info>(
             .collect::<Vec<&[u8]>>()
             .as_ref(),
     );
-    let asset_id = get_asset_id(&merkle_tree.key(), index);
+    let asset_id = get_asset_id(&merkle_tree.key(), nonce);
     let leaf = keccak::hashv(&[
         &[mpl_bubblegum::types::Version::V1.to_bytes()],
         asset_id.as_ref(),
         owner.key().as_ref(),
         delegate.key().as_ref(),
-        index.to_le_bytes().as_ref(),
+        nonce.to_le_bytes().as_ref(),
         data_hash.as_ref(),
         creator_hash.as_ref(),
     ])
@@ -57,13 +58,17 @@ pub fn check_cnft<'info>(
     verify_leaf_cpi_builder.merkle_tree(merkle_tree);
     verify_leaf_cpi_builder.root(root);
     verify_leaf_cpi_builder.leaf(leaf);
-    verify_leaf_cpi_builder.index(index.try_into().unwrap());
+    verify_leaf_cpi_builder.index(index);
     remaining_accounts.iter().for_each(|a| {
         verify_leaf_cpi_builder.add_remaining_account(a, false, false);
     });
     verify_leaf_cpi_builder.invoke()?;
 
-    Ok(asset_id)
+    Ok((
+        asset_id,
+        data_hash.as_ref().try_into().unwrap(),
+        creator_hash.as_ref().try_into().unwrap(),
+    ))
 }
 
 fn convert_cnft_metadata_to_metadata_args(

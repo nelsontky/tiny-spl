@@ -8,8 +8,9 @@ pub fn burn_cnft<'info>(
     creator_hash: [u8; 32],
     nonce: u64,
     index: u32,
+    remaining_accounts: &[AccountInfo<'info>],
 ) -> Result<()> {
-    let ix = mpl_bubblegum::instructions::Burn {
+    let mut ix = mpl_bubblegum::instructions::Burn {
         compression_program: *ctx.accounts.compression_program.key,
         leaf_delegate: (
             *ctx.accounts.leaf_delegate.key,
@@ -28,11 +29,24 @@ pub fn burn_cnft<'info>(
         root,
         data_hash,
         creator_hash,
-        nonce,
         index,
+        nonce,
     });
 
-    solana_program::program::invoke(&ix, &ToAccountInfos::to_account_infos(&ctx))?;
+    remaining_accounts.iter().for_each(|account_info| {
+        ix.accounts.push(AccountMeta {
+            pubkey: account_info.key(),
+            is_signer: false,
+            is_writable: false,
+        });
+    });
+
+    let mut account_infos = ToAccountInfos::to_account_infos(&ctx);
+    remaining_accounts.iter().for_each(|account_info| {
+        account_infos.push(account_info.clone());
+    });
+
+    solana_program::program::invoke(&ix, &account_infos)?;
 
     Ok(())
 }

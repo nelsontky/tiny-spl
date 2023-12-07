@@ -3,6 +3,7 @@ use anchor_spl::metadata::mpl_token_metadata;
 
 use crate::{
     constants::TINY_SPL_AUTHORITY_SEED,
+    noop::Noop,
     state::TinySplAuthority,
     utils::{get_mint_tiny_spl_args, mint_tiny_spl_to_collection, MintTinySplToCollection},
 };
@@ -27,8 +28,7 @@ pub fn mint_to(ctx: Context<MintTo>, amount: u64) -> Result<()> {
         ctx.accounts.mpl_bubblegum_program.to_account_info(),
         MintTinySplToCollection {
             tree_config: ctx.accounts.tree_authority.to_account_info(),
-            leaf_owner: ctx.accounts.leaf_owner.to_account_info(),
-            leaf_delegate: ctx.accounts.leaf_delegate.to_account_info(),
+            new_leaf_owner: ctx.accounts.new_leaf_owner.to_account_info(),
             merkle_tree: ctx.accounts.merkle_tree.to_account_info(),
             payer: ctx.accounts.mint_authority.to_account_info(),
             collection_mint: ctx.accounts.collection_mint.to_account_info(),
@@ -65,9 +65,7 @@ pub struct MintTo<'info> {
     /// CHECK: checked in cpi to bubblegum
     pub tree_authority: AccountInfo<'info>,
     /// CHECK: This account is neither written to nor read from.
-    pub leaf_owner: AccountInfo<'info>,
-    /// CHECK: This account is neither written to nor read from.
-    pub leaf_delegate: AccountInfo<'info>,
+    pub new_leaf_owner: AccountInfo<'info>,
     #[account(mut)]
     /// CHECK: checked in cpi to account compression
     pub merkle_tree: UncheckedAccount<'info>,
@@ -92,8 +90,7 @@ pub struct MintTo<'info> {
             && tiny_spl_authority.mint_authority == Some(mint_authority.key())
     )]
     pub tiny_spl_authority: Box<Account<'info, TinySplAuthority>>,
-    /// CHECK: checked in cpi to bubblegum
-    pub log_wrapper: AccountInfo<'info>,
+    pub log_wrapper: Program<'info, Noop>,
     /// CHECK: checked in cpi to bubblegum
     pub compression_program: AccountInfo<'info>,
     /// CHECK: checked in cpi to bubblegum

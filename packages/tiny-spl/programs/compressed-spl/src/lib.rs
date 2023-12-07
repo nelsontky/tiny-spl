@@ -59,9 +59,21 @@ pub mod tiny_spl {
         asset_id: Pubkey,
         root: [u8; 32],
         cnft_metadata: CnftMetadata,
-        index: u64,
+        nonce: u64,
+        index: u32,
     ) -> Result<()> {
-        processor::upload_cnft_metadata(ctx, asset_id, root, cnft_metadata, index)
+        processor::upload_cnft_metadata(ctx, asset_id, root, cnft_metadata, nonce, index)
+    }
+
+    pub fn split<'info>(
+        ctx: Context<'_, '_, '_, 'info, Transfer<'info>>,
+        asset_id: Pubkey,
+        root: [u8; 32],
+        nonce: u64,
+        index: u32,
+        amounts: Vec<u64>,
+    ) -> Result<()> {
+        processor::split(ctx, asset_id, root, nonce, index, amounts)
     }
 }
 

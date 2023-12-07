@@ -1,5 +1,5 @@
 import * as anchor from "@coral-xyz/anchor";
-import { AccountMeta, PublicKey } from "@solana/web3.js";
+import { AccountMeta, ComputeBudgetProgram, PublicKey } from "@solana/web3.js";
 import {
   CNFT_METADATA_SEED,
   CONNECTION,
@@ -64,6 +64,8 @@ const [tinySplAuthority] = PublicKey.findProgramAddressSync(
   PROGRAM.programId
 );
 
+const TOKENS_TO_MINT = 3;
+
 describe("tiny-spl", () => {
   anchor.setProvider(anchor.AnchorProvider.env());
 
@@ -77,8 +79,7 @@ describe("tiny-spl", () => {
         tinySplAuthority,
         compressionProgram: COMPRESSION_PROGRAM_ID,
         editionAccount: masterEdition,
-        leafDelegate: SIGNER.publicKey,
-        leafOwner: SIGNER.publicKey,
+        newLeafOwner: SIGNER.publicKey,
         logWrapper: SPL_NOOP_PROGRAM_ID,
         merkleTree: TREE_ID,
         mintAuthority: WRONG_AUTHORITY.publicKey,
@@ -100,7 +101,7 @@ describe("tiny-spl", () => {
   });
 
   it("should allow mint authority to mint tokens", async () => {
-    const MINT_COUNT = new anchor.BN(3);
+    const MINT_COUNT = new anchor.BN(TOKENS_TO_MINT);
 
     const prevSupply = (
       await PROGRAM.account.tinySplAuthority.fetch(
@@ -118,8 +119,7 @@ describe("tiny-spl", () => {
         tinySplAuthority,
         compressionProgram: COMPRESSION_PROGRAM_ID,
         editionAccount: masterEdition,
-        leafDelegate: SIGNER.publicKey,
-        leafOwner: SIGNER.publicKey,
+        newLeafOwner: SIGNER.publicKey,
         logWrapper: SPL_NOOP_PROGRAM_ID,
         merkleTree: TREE_ID,
         mintAuthority: SIGNER.publicKey,
@@ -201,7 +201,8 @@ describe("tiny-spl", () => {
         SIGNER_OWNED_SPOOFED_COLLECTION_TOKEN_FOR_TESTING,
         [...new PublicKey(assetProof.root.trim()).toBytes()],
         metadataArgs,
-        new anchor.BN(asset.compression.leaf_id)
+        new anchor.BN(asset.compression.leaf_id),
+        asset.compression.leaf_id
       )
       .accounts({
         cnftMetadata,
@@ -296,7 +297,8 @@ describe("tiny-spl", () => {
         SIGNER_OWNED_INVALID_TOKEN_FOR_TESTING,
         [...new PublicKey(assetProof.root.trim()).toBytes()],
         metadataArgs,
-        new anchor.BN(asset.compression.leaf_id)
+        new anchor.BN(asset.compression.leaf_id),
+        asset.compression.leaf_id
       )
       .accounts({
         cnftMetadata,
@@ -381,7 +383,8 @@ describe("tiny-spl", () => {
         SIGNER_OWNED_TOKEN_FOR_TESTING,
         [...new PublicKey(assetProof.root.trim()).toBytes()],
         metadataArgs,
-        new anchor.BN(asset.compression.leaf_id)
+        new anchor.BN(asset.compression.leaf_id),
+        asset.compression.leaf_id
       )
       .accounts({
         cnftMetadata,
@@ -403,6 +406,109 @@ describe("tiny-spl", () => {
       [SIGNER],
       true
     );
-    console.log(result);
+
+    const account = await PROGRAM.account.cnftMetadata.fetch(cnftMetadata);
+
+    expect(result.value.err).to.be.null;
+    expect(account.name).to.equal(metadataArgs.name);
+  });
+
+  it.only("should allow token owner to split token", async () => {
+    const assets = await CONNECTION.getAssetsByOwner({
+      ownerAddress: SIGNER.publicKey.toBase58(),
+      limit: 1,
+      sortBy: {
+        sortBy: "created",
+        sortDirection: "desc",
+      },
+    });
+
+    const newestAsset = assets.items[0];
+    const assetProof = await CONNECTION.getAssetProof(
+      new PublicKey(newestAsset.id)
+    );
+    const [cnftMetadata] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from(CNFT_METADATA_SEED),
+        new PublicKey(newestAsset.id).toBuffer(),
+      ],
+      PROGRAM.programId
+    );
+
+    const treeAccount = await ConcurrentMerkleTreeAccount.fromAccountAddress(
+      CONNECTION,
+      TREE_ID
+    );
+    const canopyDepth = treeAccount.getCanopyDepth();
+
+    // parse the list of proof addresses into a valid AccountMeta[]
+    const proofPath: AccountMeta[] = assetProof.proof
+      .map((node: string) => ({
+        pubkey: new PublicKey(node),
+        isSigner: false,
+        isWritable: false,
+      }))
+      .slice(0, assetProof.proof.length - (!!canopyDepth ? canopyDepth : 0));
+
+    const ix = await PROGRAM.methods
+      .split(
+        new PublicKey(newestAsset.id),
+        [...new PublicKey(assetProof.root.trim()).toBytes()],
+        new anchor.BN(newestAsset.compression.leaf_id),
+        newestAsset.compression.leaf_id,
+        [new anchor.BN(1), new anchor.BN(2)]
+      )
+      .accounts({
+        cnftMetadata,
+        leafOwner: SIGNER.publicKey,
+        leafDelegate: SIGNER.publicKey,
+        compressionProgram: COMPRESSION_PROGRAM_ID,
+        collectionMint: mint,
+        tinySplAuthority,
+        merkleTree: TREE_ID,
+        systemProgram: anchor.web3.SystemProgram.programId,
+        authority: SIGNER.publicKey,
+        bubblegumSigner,
+        collectionMetadata: metadata,
+        editionAccount: masterEdition,
+        logWrapper: SPL_NOOP_PROGRAM_ID,
+        mplBubblegumProgram: BUBBLEGUM_PROGRAM_ID,
+        newLeafOwner: SIGNER.publicKey,
+        tokenMetadataProgram: mplTokenMetadataProgramId,
+        treeAuthority,
+      })
+      .remainingAccounts(proofPath)
+      .instruction();
+
+    const modifyComputeUnits = ComputeBudgetProgram.setComputeUnitLimit({
+      units: 1_400_000,
+    });
+
+    await sendAndConfirmIxs(
+      [modifyComputeUnits, ix],
+      SIGNER.publicKey,
+      [SIGNER],
+      true
+    );
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    const resultAssets = await CONNECTION.getAssetsByOwner({
+      ownerAddress: SIGNER.publicKey.toBase58(),
+      limit: 2,
+      sortBy: {
+        sortBy: "created",
+        sortDirection: "desc",
+      },
+    });
+
+    const resultAssetsQuantity = resultAssets.items.map((asset) =>
+      new URL(asset.content.json_uri).searchParams.get("amount")
+    );
+    const totalNewAssetsAmount = resultAssetsQuantity.reduce(
+      (acc, curr) => (curr ? acc + parseInt(curr) : acc),
+      0
+    );
+    expect(totalNewAssetsAmount).to.equal(TOKENS_TO_MINT);
   });
 });

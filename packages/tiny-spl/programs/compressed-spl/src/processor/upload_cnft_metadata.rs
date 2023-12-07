@@ -11,11 +11,13 @@ pub fn upload_cnft_metadata<'info>(
     asset_id: Pubkey,
     root: [u8; 32],
     cnft_metadata: CnftMetadata,
-    index: u64,
+    nonce: u64,
+    index: u32,
 ) -> Result<()> {
    let calculated_asset_id = check_cnft(
         root,
         &cnft_metadata,
+        nonce,
         index,
         &ctx.accounts.merkle_tree.to_account_info(),
         &ctx.accounts.leaf_owner.to_account_info(),
@@ -23,24 +25,24 @@ pub fn upload_cnft_metadata<'info>(
         &ctx.accounts.collection_mint.to_account_info(),
         &ctx.accounts.compression_program.to_account_info(),
         &ctx.remaining_accounts
-    )?;
+    )?.0;
 
     require!(calculated_asset_id == asset_id, TinySplError::AssetIdMismatch);
 
-    let cnft_metadata = &mut ctx.accounts.cnft_metadata;
-    cnft_metadata.name = cnft_metadata.name.clone();
-    cnft_metadata.symbol = cnft_metadata.symbol.clone();
-    cnft_metadata.uri = cnft_metadata.uri.clone();
-    cnft_metadata.seller_fee_basis_points = cnft_metadata.seller_fee_basis_points;
-    cnft_metadata.primary_sale_happened = cnft_metadata.primary_sale_happened;
-    cnft_metadata.is_mutable = cnft_metadata.is_mutable;
-    cnft_metadata.edition_nonce = cnft_metadata.edition_nonce;
-    cnft_metadata.token_standard = cnft_metadata.token_standard.clone();
-    cnft_metadata.collection = cnft_metadata.collection.clone();
-    cnft_metadata.uses = cnft_metadata.uses.clone();
-    cnft_metadata.token_program_version = cnft_metadata.token_program_version.clone();
-    cnft_metadata.creators = cnft_metadata.creators.clone();
-    cnft_metadata.cnft_metadata_account_creator = ctx.accounts.cnft_metadata_account_creator.key();
+    let cnft_metadata_account = &mut ctx.accounts.cnft_metadata;
+    cnft_metadata_account.name = cnft_metadata.name.clone();
+    cnft_metadata_account.symbol = cnft_metadata.symbol.clone();
+    cnft_metadata_account.uri = cnft_metadata.uri.clone();
+    cnft_metadata_account.seller_fee_basis_points = cnft_metadata.seller_fee_basis_points;
+    cnft_metadata_account.primary_sale_happened = cnft_metadata.primary_sale_happened;
+    cnft_metadata_account.is_mutable = cnft_metadata.is_mutable;
+    cnft_metadata_account.edition_nonce = cnft_metadata.edition_nonce;
+    cnft_metadata_account.token_standard = cnft_metadata.token_standard.clone();
+    cnft_metadata_account.collection = cnft_metadata.collection.clone();
+    cnft_metadata_account.uses = cnft_metadata.uses.clone();
+    cnft_metadata_account.token_program_version = cnft_metadata.token_program_version.clone();
+    cnft_metadata_account.creators = cnft_metadata.creators.clone();
+    cnft_metadata_account.cnft_metadata_account_creator = ctx.accounts.cnft_metadata_account_creator.key();
 
     Ok(())
 }

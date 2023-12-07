@@ -8,8 +8,8 @@ pub fn mint_tiny_spl_to_collection<'info>(
 ) -> Result<()> {
     let ix = mpl_bubblegum::instructions::MintToCollectionV1 {
         tree_config: *ctx.accounts.tree_config.key,
-        leaf_owner: *ctx.accounts.leaf_owner.key,
-        leaf_delegate: *ctx.accounts.leaf_delegate.key,
+        leaf_owner: *ctx.accounts.new_leaf_owner.key,
+        leaf_delegate: *ctx.accounts.new_leaf_owner.key,
         merkle_tree: *ctx.accounts.merkle_tree.key,
         payer: *ctx.accounts.payer.key,
         tree_creator_or_delegate: ctx.accounts.tiny_spl_authority.key(),
@@ -63,9 +63,7 @@ pub struct MintTinySplToCollection<'info> {
     /// CHECK: checked in cpi to bubblegum
     pub tree_config: AccountInfo<'info>,
     /// CHECK: checked in cpi to bubblegum
-    pub leaf_owner: AccountInfo<'info>,
-    /// CHECK: checked in cpi to bubblegum
-    pub leaf_delegate: AccountInfo<'info>,
+    pub new_leaf_owner: AccountInfo<'info>,
     /// CHECK: checked in cpi to bubblegum
     pub merkle_tree: AccountInfo<'info>,
     /// CHECK: checked in cpi to bubblegum
