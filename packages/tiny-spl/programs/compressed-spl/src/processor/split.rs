@@ -142,16 +142,16 @@ pub struct Transfer<'info> {
     ]
     pub authority: Signer<'info>,
     /// CHECK: This account is checked in instruction
-    pub leaf_owner: AccountInfo<'info>,
+    pub leaf_owner: UncheckedAccount<'info>,
     /// CHECK: This account is checked in instruction
-    pub leaf_delegate: AccountInfo<'info>,
+    pub leaf_delegate: UncheckedAccount<'info>,
     /// CHECK: This account is checked in cpi
-    pub new_leaf_owner: AccountInfo<'info>,
+    pub new_leaf_owner: UncheckedAccount<'info>,
     /// CHECK: checked in cpi to bubblegum
     pub collection_mint: UncheckedAccount<'info>,
     #[account(mut)]
     /// CHECK: checked in cpi to bubblegum
-    pub collection_metadata: AccountInfo<'info>,
+    pub collection_metadata: UncheckedAccount<'info>,
     /// CHECK: checked in cpi to bubblegum
     pub edition_account: UncheckedAccount<'info>,
     /// CHECK: checked in cpi to bubblegum
@@ -167,7 +167,7 @@ pub struct Transfer<'info> {
     pub tiny_spl_authority: Box<Account<'info, TinySplAuthority>>,
     #[account(mut)]
     /// CHECK: checked in cpi to bubblegum
-    pub tree_authority: AccountInfo<'info>,
+    pub tree_authority: UncheckedAccount<'info>,
     /// CHECK: This account is checked in cpi
     #[account(mut)]
     pub merkle_tree: UncheckedAccount<'info>,

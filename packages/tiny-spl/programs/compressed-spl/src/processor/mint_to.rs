@@ -63,9 +63,9 @@ pub fn mint_to(ctx: Context<MintTo>, amount: u64) -> Result<()> {
 pub struct MintTo<'info> {
     #[account(mut)]
     /// CHECK: checked in cpi to bubblegum
-    pub tree_authority: AccountInfo<'info>,
+    pub tree_authority: UncheckedAccount<'info>,
     /// CHECK: This account is neither written to nor read from.
-    pub new_leaf_owner: AccountInfo<'info>,
+    pub new_leaf_owner: UncheckedAccount<'info>,
     #[account(mut)]
     /// CHECK: checked in cpi to account compression
     pub merkle_tree: UncheckedAccount<'info>,
@@ -74,7 +74,7 @@ pub struct MintTo<'info> {
     pub collection_mint: UncheckedAccount<'info>,
     #[account(mut)]
     /// CHECK: checked in cpi to bubblegum
-    pub collection_metadata: AccountInfo<'info>,
+    pub collection_metadata: UncheckedAccount<'info>,
     /// CHECK: checked in cpi to bubblegum
     pub edition_account: UncheckedAccount<'info>,
     /// CHECK: checked in cpi to bubblegum
@@ -95,12 +95,12 @@ pub struct MintTo<'info> {
         address = spl_account_compression::ID
     )]
     /// CHECK: checked in account constraint
-    pub compression_program: AccountInfo<'info>,
+    pub compression_program: UncheckedAccount<'info>,
     pub token_metadata_program: Program<'info, Metadata>,
     pub system_program: Program<'info, System>,
     #[account(
         address = mpl_bubblegum::ID
     )]
     /// CHECK: checked in account constraint
-    pub mpl_bubblegum_program: AccountInfo<'info>,
+    pub mpl_bubblegum_program: UncheckedAccount<'info>,
 }

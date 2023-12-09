@@ -62,9 +62,9 @@ pub struct UploadCnftMetadata<'info> {
     )]
     pub cnft_metadata: Box<Account<'info, CnftMetadata>>,
     /// CHECK: This account is checked in instruction
-    pub leaf_owner: AccountInfo<'info>,
+    pub leaf_owner: UncheckedAccount<'info>,
     /// CHECK: This account is checked in instruction
-    pub leaf_delegate: AccountInfo<'info>,
+    pub leaf_delegate: UncheckedAccount<'info>,
     #[account(
         mut, 
         constraint = cnft_metadata_account_creator.key() == leaf_owner.key()

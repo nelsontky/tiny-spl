@@ -103,10 +103,10 @@ fn create_nft_collection<'info>(
 pub struct CreateMint<'info> {
     #[account(mut)]
     /// CHECK: checked in cpi to mpl token metadata
-    pub metadata: AccountInfo<'info>,
+    pub metadata: UncheckedAccount<'info>,
     #[account(mut)]
     /// CHECK: checked in cpi to mpl token metadata
-    pub master_edition: AccountInfo<'info>,
+    pub master_edition: UncheckedAccount<'info>,
     #[account(mut)]
     /// CHECK: checked in cpi to mpl token metadata
     pub mint: Signer<'info>,
