@@ -75,6 +75,13 @@ pub mod tiny_spl {
     ) -> Result<()> {
         processor::split(ctx, asset_id, root, nonce, index, amounts)
     }
+
+    pub fn close_cnft_metadata_account(
+        ctx: Context<CloseCnftMetadataAccount>,
+        asset_id: Pubkey,
+    ) -> Result<()> {
+        processor::close_cnft_metadata_account(ctx, asset_id)
+    }
 }
 
 #[derive(Accounts)]

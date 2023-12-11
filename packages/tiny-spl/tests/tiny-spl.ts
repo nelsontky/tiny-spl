@@ -326,14 +326,23 @@ describe("tiny-spl", () => {
   });
 
   it("should allow token owner to upload cnft metadata for a valid token", async () => {
+    const assets = await CONNECTION.getAssetsByOwner({
+      ownerAddress: SIGNER.publicKey.toBase58(),
+      limit: 1,
+      sortBy: {
+        sortBy: "created",
+        sortDirection: "desc",
+      },
+    });
+
+    const newestAsset = assets.items[0];
     const assetProof = await CONNECTION.getAssetProof(
-      SIGNER_OWNED_TOKEN_FOR_TESTING
+      new PublicKey(newestAsset.id)
     );
-    const asset = await CONNECTION.getAsset(SIGNER_OWNED_TOKEN_FOR_TESTING);
     const [cnftMetadata] = PublicKey.findProgramAddressSync(
       [
         Buffer.from(CNFT_METADATA_SEED),
-        SIGNER_OWNED_TOKEN_FOR_TESTING.toBuffer(),
+        new PublicKey(newestAsset.id).toBuffer(),
       ],
       PROGRAM.programId
     );
@@ -353,7 +362,7 @@ describe("tiny-spl", () => {
       }))
       .slice(0, assetProof.proof.length - (!!canopyDepth ? canopyDepth : 0));
 
-    const creators: Creator[] = asset.creators.map((creator) => {
+    const creators: Creator[] = newestAsset.creators.map((creator) => {
       return {
         address: new PublicKey(creator.address),
         verified: creator.verified,
@@ -361,18 +370,18 @@ describe("tiny-spl", () => {
       };
     });
     const metadataArgs: MetadataArgs = {
-      name: asset.content.metadata?.name || "",
-      symbol: asset.content.metadata?.symbol || "",
-      uri: asset.content.json_uri,
-      sellerFeeBasisPoints: asset.royalty.basis_points,
+      name: newestAsset.content.metadata?.name || "",
+      symbol: newestAsset.content.metadata?.symbol || "",
+      uri: newestAsset.content.json_uri,
+      sellerFeeBasisPoints: newestAsset.royalty.basis_points,
       creators: creators,
       collection: {
-        key: new PublicKey(asset.grouping[0].group_value),
+        key: new PublicKey(newestAsset.grouping[0].group_value),
         verified: true,
       },
-      editionNonce: asset.supply.edition_nonce,
-      primarySaleHappened: asset.royalty.primary_sale_happened,
-      isMutable: asset.mutable,
+      editionNonce: newestAsset.supply.edition_nonce,
+      primarySaleHappened: newestAsset.royalty.primary_sale_happened,
+      isMutable: newestAsset.mutable,
       uses: null,
       tokenProgramVersion: { original: {} } as any,
       tokenStandard: { nonFungible: {} } as any,
@@ -380,11 +389,11 @@ describe("tiny-spl", () => {
 
     const ix = await PROGRAM.methods
       .uploadCnftMetadata(
-        SIGNER_OWNED_TOKEN_FOR_TESTING,
+        new PublicKey(newestAsset.id),
         [...new PublicKey(assetProof.root.trim()).toBytes()],
         metadataArgs,
-        new anchor.BN(asset.compression.leaf_id),
-        asset.compression.leaf_id
+        new anchor.BN(newestAsset.compression.leaf_id),
+        newestAsset.compression.leaf_id
       )
       .accounts({
         cnftMetadata,
@@ -413,7 +422,7 @@ describe("tiny-spl", () => {
     expect(account.name).to.equal(metadataArgs.name);
   });
 
-  it.only("should allow token owner to split token", async () => {
+  it("should allow token owner to split token and allow metadata creator to close metadata account", async () => {
     const assets = await CONNECTION.getAssetsByOwner({
       ownerAddress: SIGNER.publicKey.toBase58(),
       limit: 1,
@@ -480,16 +489,26 @@ describe("tiny-spl", () => {
       .remainingAccounts(proofPath)
       .instruction();
 
+    const closeMetadataIx = await PROGRAM.methods
+      .closeCnftMetadataAccount(new PublicKey(newestAsset.id))
+      .accounts({
+        cnftMetadata,
+        cnftMetadataAccountCreator: SIGNER.publicKey,
+      })
+      .instruction();
+
     const modifyComputeUnits = ComputeBudgetProgram.setComputeUnitLimit({
       units: 1_400_000,
     });
 
-    await sendAndConfirmIxs(
-      [modifyComputeUnits, ix],
+    const result = await sendAndConfirmIxs(
+      [modifyComputeUnits, ix, closeMetadataIx],
       SIGNER.publicKey,
       [SIGNER],
       true
     );
+
+    expect(result.value.err).to.be.null;
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
