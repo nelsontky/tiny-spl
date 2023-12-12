@@ -2,8 +2,8 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::program::invoke;
 use anchor_lang::solana_program::pubkey::Pubkey;
 
-use crate::noop::Noop;
 use crate::A;
+use crate::program_wrappers::Noop;
 use crate::{constants::METADATA_BUFFER_START, state::LoggingMetadata};
 
 const MAX_CPI_BYTES: usize = 1238;

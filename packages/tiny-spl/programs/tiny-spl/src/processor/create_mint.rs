@@ -4,7 +4,7 @@ use anchor_spl::{
     token::Token,
 };
 
-use crate::{constants::TINY_SPL_AUTHORITY_SEED, error::TinySplError, state::TinySplAuthority};
+use crate::{constants::TINY_SPL_AUTHORITY_SEED, error::TinySplError, state::TinySplAuthority, program_wrappers::SysVarInstructions};
 
 pub fn create_mint(
     ctx: Context<CreateMint>,
@@ -37,9 +37,9 @@ pub fn create_mint(
             authority: ctx.accounts.tiny_spl_authority.to_account_info(),
             payer: ctx.accounts.mint_authority.to_account_info(),
             update_authority: ctx.accounts.tiny_spl_authority.to_account_info(),
-            sysvar_instructions: ctx.accounts.sysvar_instructions.to_account_info(),
-            spl_token_program: ctx.accounts.spl_token_program.to_account_info(),
-            system_program: ctx.accounts.system_program.to_account_info(),
+            sysvar_instructions: ctx.accounts.sysvar_instructions.clone(),
+            spl_token_program: ctx.accounts.spl_token_program.clone(),
+            system_program: ctx.accounts.system_program.clone(),
         },
         &seeds,
     );
@@ -108,7 +108,6 @@ pub struct CreateMint<'info> {
     /// CHECK: checked in cpi to mpl token metadata
     pub master_edition: UncheckedAccount<'info>,
     #[account(mut)]
-    /// CHECK: checked in cpi to mpl token metadata
     pub mint: Signer<'info>,
     #[account(mut)]
     pub mint_authority: Signer<'info>,
@@ -124,9 +123,7 @@ pub struct CreateMint<'info> {
     )]
     pub tiny_spl_authority: Box<Account<'info, TinySplAuthority>>,
     pub system_program: Program<'info, System>,
-    #[account(address = Pubkey::try_from("Sysvar1nstructions1111111111111111111111111").unwrap())]
-    /// CHECK: This account is checked in account constraint
-    pub sysvar_instructions: UncheckedAccount<'info>,
+    pub sysvar_instructions: Program<'info, SysVarInstructions>,
     pub spl_token_program: Program<'info, Token>,
     pub mpl_token_metadata_program: Program<'info, Metadata>,
 }
@@ -145,12 +142,9 @@ pub struct CreateNftCollection<'info> {
     pub payer: AccountInfo<'info>,
     /// CHECK: checked in cpi to mpl token metadata
     pub update_authority: AccountInfo<'info>,
-    /// CHECK: checked in cpi to mpl token metadata
-    pub sysvar_instructions: AccountInfo<'info>,
-    /// CHECK: checked in cpi to mpl token metadata
-    pub system_program: AccountInfo<'info>,
-    /// CHECK: checked in cpi to mpl token metadata
-    pub spl_token_program: AccountInfo<'info>,
+    pub sysvar_instructions: Program<'info, SysVarInstructions>,
+    pub system_program: Program<'info, System>,
+    pub spl_token_program: Program<'info, Token>,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize)]

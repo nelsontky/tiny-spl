@@ -7,6 +7,7 @@ mod close_metadata_account;
 mod upload_cnft_metadata;
 mod split;
 mod close_cnft_metadata_account;
+mod combine;
 
 pub use create_mint::*;
 pub use upload_logging_metadata::*;
@@ -17,3 +18,4 @@ pub use close_metadata_account::*;
 pub use upload_cnft_metadata::*;
 pub use split::*;
 pub use close_cnft_metadata_account::*;
+pub use combine::*;

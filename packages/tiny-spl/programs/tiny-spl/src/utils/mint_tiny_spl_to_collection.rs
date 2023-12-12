@@ -29,7 +29,7 @@ pub fn mint_tiny_spl_to_collection<'info>(
             metadata: mpl_bubblegum::types::MetadataArgs {
                 name: mint_tiny_spl_args.name.replace("\0", ""),
                 symbol: mint_tiny_spl_args.symbol.replace("\0", ""),
-                uri: mint_tiny_spl_args.uri.clone(),
+                uri: mint_tiny_spl_args.uri.replace("\0", ""),
                 seller_fee_basis_points: 0,
                 primary_sale_happened: false,
                 is_mutable: true,

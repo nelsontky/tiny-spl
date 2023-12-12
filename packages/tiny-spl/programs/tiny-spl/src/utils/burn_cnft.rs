@@ -2,7 +2,7 @@ use anchor_lang::{prelude::*, solana_program};
 use mpl_bubblegum::instructions::BurnInstructionArgs;
 
 pub fn burn_cnft<'info>(
-    ctx: CpiContext<'_, '_, '_, 'info, BurnCnft<'info>>,
+    ctx: &CpiContext<'_, '_, '_, 'info, BurnCnft<'info>>,
     root: [u8; 32],
     data_hash: [u8; 32],
     creator_hash: [u8; 32],
@@ -41,7 +41,7 @@ pub fn burn_cnft<'info>(
         });
     });
 
-    let mut account_infos = ToAccountInfos::to_account_infos(&ctx);
+    let mut account_infos = ToAccountInfos::to_account_infos(ctx);
     remaining_accounts.iter().for_each(|account_info| {
         account_infos.push(account_info.clone());
     });

@@ -500,8 +500,6 @@ describe("tiny-spl", () => {
       true
     );
 
-    console.log(result1.value.err);
-
     const ixWithZero = await PROGRAM.methods
       .split(
         new PublicKey(newestAsset.id),
@@ -538,8 +536,6 @@ describe("tiny-spl", () => {
       [SIGNER],
       true
     );
-
-    console.log(result2.value.err);
 
     const errorCode1 = (result1.value?.err as any).InstructionError[1].Custom;
     const errorCode2 = (result2.value?.err as any).InstructionError[1].Custom;
@@ -655,4 +651,6 @@ describe("tiny-spl", () => {
     );
     expect(totalNewAssetsAmount).to.equal(TOKENS_TO_MINT);
   });
+
+  it("should allow token owner to combine tokens they own", async () => {});
 });

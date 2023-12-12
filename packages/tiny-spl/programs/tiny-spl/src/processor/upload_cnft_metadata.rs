@@ -3,7 +3,7 @@ use anchor_lang::prelude::*;
 use crate::{
     constants::{CNFT_METADATA_SEED, MAX_METADATA_LEN, TINY_SPL_AUTHORITY_SEED},
     state::{CnftMetadata, TinySplAuthority},
-    utils::check_cnft, error::TinySplError,
+    utils::check_cnft, error::TinySplError, program_wrappers::SplCompression,
 };
 
 pub fn upload_cnft_metadata<'info>(
@@ -85,7 +85,5 @@ pub struct UploadCnftMetadata<'info> {
     /// CHECK: This account is checked in cpi
     pub merkle_tree: UncheckedAccount<'info>,
     pub system_program: Program<'info, System>,
-    #[account(address = spl_account_compression::id())]
-    /// CHECK: This account is checked in account constraint
-    pub compression_program: UncheckedAccount<'info>,
+    pub compression_program: Program<'info, SplCompression>,
 }

@@ -3,9 +3,8 @@ use anchor_spl::metadata::{mpl_token_metadata, Metadata};
 
 use crate::{
     constants::TINY_SPL_AUTHORITY_SEED,
-    noop::Noop,
     state::TinySplAuthority,
-    utils::{get_mint_tiny_spl_args, mint_tiny_spl_to_collection, MintTinySplToCollection},
+    utils::{get_mint_tiny_spl_args, mint_tiny_spl_to_collection, MintTinySplToCollection}, program_wrappers::{Noop, MplBubblegum, SplCompression},
 };
 
 pub fn mint_to(ctx: Context<MintTo>, amount: u64) -> Result<()> {
@@ -91,16 +90,8 @@ pub struct MintTo<'info> {
     )]
     pub tiny_spl_authority: Box<Account<'info, TinySplAuthority>>,
     pub log_wrapper: Program<'info, Noop>,
-    #[account(
-        address = spl_account_compression::ID
-    )]
-    /// CHECK: checked in account constraint
-    pub compression_program: UncheckedAccount<'info>,
+    pub compression_program: Program<'info, SplCompression>,
     pub token_metadata_program: Program<'info, Metadata>,
     pub system_program: Program<'info, System>,
-    #[account(
-        address = mpl_bubblegum::ID
-    )]
-    /// CHECK: checked in account constraint
-    pub mpl_bubblegum_program: UncheckedAccount<'info>,
+    pub mpl_bubblegum_program: Program<'info, MplBubblegum>,
 }

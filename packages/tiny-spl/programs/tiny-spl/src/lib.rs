@@ -1,6 +1,6 @@
 mod constants;
 mod error;
-mod noop;
+mod program_wrappers;
 mod processor;
 mod state;
 mod utils;
@@ -66,7 +66,7 @@ pub mod tiny_spl {
     }
 
     pub fn split<'info>(
-        ctx: Context<'_, '_, '_, 'info, Transfer<'info>>,
+        ctx: Context<'_, '_, '_, 'info, Split<'info>>,
         asset_id: Pubkey,
         root: [u8; 32],
         nonce: u64,
@@ -81,6 +81,32 @@ pub mod tiny_spl {
         asset_id: Pubkey,
     ) -> Result<()> {
         processor::close_cnft_metadata_account(ctx, asset_id)
+    }
+
+    pub fn combine<'info>(
+        ctx: Context<'_, '_, '_, 'info, Combine<'info>>,
+        asset_id_a: Pubkey,
+        asset_id_b: Pubkey,
+        root_a: [u8; 32],
+        root_b: [u8; 32],
+        nonce_a: u64,
+        nonce_b: u64,
+        index_a: u32,
+        index_b: u32,
+        asset_a_proof_path_end_index: usize,
+    ) -> Result<()> {
+        processor::combine(
+            ctx,
+            asset_id_a,
+            asset_id_b,
+            root_a,
+            root_b,
+            nonce_a,
+            nonce_b,
+            index_a,
+            index_b,
+            asset_a_proof_path_end_index,
+        )
     }
 }
 

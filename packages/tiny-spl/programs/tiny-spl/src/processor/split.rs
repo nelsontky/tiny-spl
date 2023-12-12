@@ -4,16 +4,15 @@ use anchor_spl::metadata::{mpl_token_metadata, Metadata};
 use crate::{
     constants::{CNFT_METADATA_SEED, TINY_SPL_AUTHORITY_SEED},
     error::TinySplError,
-    noop::Noop,
     state::{CnftMetadata, TinySplAuthority},
     utils::{
-        burn_cnft, check_cnft, get_mint_tiny_spl_args, mint_tiny_spl_to_collection,
-        verify_token_splits, BurnCnft, MintTinySplToCollection,
-    },
+        burn_cnft, check_cnft, get_cnft_metadata_from_account, get_mint_tiny_spl_args,
+        mint_tiny_spl_to_collection, verify_token_splits, BurnCnft, MintTinySplToCollection,
+    }, program_wrappers::{Noop, SplCompression, MplBubblegum},
 };
 
 pub fn split<'info>(
-    ctx: Context<'_, '_, '_, 'info, Transfer<'info>>,
+    ctx: Context<'_, '_, '_, 'info, Split<'info>>,
     asset_id: Pubkey,
     root: [u8; 32],
     nonce: u64,
@@ -21,21 +20,7 @@ pub fn split<'info>(
     amounts: Vec<u64>,
 ) -> Result<()> {
     let cnft_metadata_account = &ctx.accounts.cnft_metadata;
-    let cnft_metadata = CnftMetadata {
-        name: cnft_metadata_account.name.clone(),
-        symbol: cnft_metadata_account.symbol.clone(),
-        uri: cnft_metadata_account.uri.clone(),
-        seller_fee_basis_points: cnft_metadata_account.seller_fee_basis_points,
-        primary_sale_happened: cnft_metadata_account.primary_sale_happened,
-        is_mutable: cnft_metadata_account.is_mutable,
-        edition_nonce: cnft_metadata_account.edition_nonce,
-        token_standard: cnft_metadata_account.token_standard.clone(),
-        collection: cnft_metadata_account.collection.clone(),
-        uses: cnft_metadata_account.uses.clone(),
-        token_program_version: cnft_metadata_account.token_program_version.clone(),
-        creators: cnft_metadata_account.creators.clone(),
-        cnft_metadata_account_creator: cnft_metadata_account.cnft_metadata_account_creator,
-    };
+    let cnft_metadata = get_cnft_metadata_from_account(cnft_metadata_account);
 
     let (calculated_asset_id, data_hash, creator_hash) = check_cnft(
         root,
@@ -69,13 +54,13 @@ pub fn split<'info>(
         },
     );
     burn_cnft(
-        burn_cpi_context,
+        &burn_cpi_context,
         root,
         data_hash,
         creator_hash,
         nonce,
         index,
-        ctx.remaining_accounts
+        ctx.remaining_accounts,
     )?;
 
     let collection_metadata = mpl_token_metadata::accounts::Metadata::safe_deserialize(
@@ -100,7 +85,7 @@ pub fn split<'info>(
                 tree_config: ctx.accounts.tree_authority.to_account_info(),
                 new_leaf_owner: ctx.accounts.new_leaf_owner.to_account_info(),
                 merkle_tree: ctx.accounts.merkle_tree.to_account_info(),
-                payer: ctx.accounts.leaf_owner.to_account_info(),
+                payer: ctx.accounts.authority.to_account_info(),
                 collection_mint: ctx.accounts.collection_mint.to_account_info(),
                 collection_metadata: ctx.accounts.collection_metadata.to_account_info(),
                 collection_edition: ctx.accounts.edition_account.to_account_info(),
@@ -126,7 +111,7 @@ pub fn split<'info>(
 
 #[derive(Accounts)]
 #[instruction(asset_id: Pubkey)]
-pub struct Transfer<'info> {
+pub struct Split<'info> {
     #[account(
         seeds = [
             CNFT_METADATA_SEED,
@@ -137,9 +122,9 @@ pub struct Transfer<'info> {
     pub cnft_metadata: Box<Account<'info, CnftMetadata>>,
     #[account(
         mut,
-        constraint = authority.key() == leaf_owner.key()
-            || authority.key() == leaf_delegate.key())
-    ]
+        constraint = leaf_owner.key() == authority.key()
+            || leaf_delegate.key() == authority.key()
+    )]
     pub authority: Signer<'info>,
     /// CHECK: This account is checked in instruction
     pub leaf_owner: UncheckedAccount<'info>,
@@ -171,15 +156,9 @@ pub struct Transfer<'info> {
     /// CHECK: This account is checked in cpi
     #[account(mut)]
     pub merkle_tree: UncheckedAccount<'info>,
-    #[account(address = spl_account_compression::id())]
-    /// CHECK: This account is checked in account constraint
-    pub compression_program: UncheckedAccount<'info>,
-    #[account(
-        address = mpl_bubblegum::ID
-    )]
-    /// CHECK: checked in account constraint
-    pub mpl_bubblegum_program: UncheckedAccount<'info>,
     pub log_wrapper: Program<'info, Noop>,
-    pub system_program: Program<'info, System>,
+    pub compression_program: Program<'info, SplCompression>,
     pub token_metadata_program: Program<'info, Metadata>,
+    pub system_program: Program<'info, System>,
+    pub mpl_bubblegum_program: Program<'info, MplBubblegum>,
 }
