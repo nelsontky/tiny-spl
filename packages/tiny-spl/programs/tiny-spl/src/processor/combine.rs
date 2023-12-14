@@ -4,11 +4,12 @@ use anchor_spl::metadata::{mpl_token_metadata, Metadata};
 use crate::{
     constants::{CNFT_METADATA_SEED, TINY_SPL_AUTHORITY_SEED},
     error::TinySplError,
+    program_wrappers::{MplBubblegum, Noop, SplCompression},
     state::{CnftMetadata, TinySplAuthority},
     utils::{
         burn_cnft, check_cnft, get_cnft_metadata_from_account, get_mint_tiny_spl_args,
         get_token_amount, mint_tiny_spl_to_collection, BurnCnft, MintTinySplToCollection,
-    }, program_wrappers::{Noop, SplCompression, MplBubblegum},
+    },
 };
 
 pub fn combine<'info>(
@@ -21,9 +22,12 @@ pub fn combine<'info>(
     nonce_b: u64,
     index_a: u32,
     index_b: u32,
-    asset_a_proof_path_end_index: usize,
+    asset_a_proof_path_end_index: u32,
 ) -> Result<()> {
-    require!(asset_id_a != asset_id_b, TinySplError::AssetIdMismatch);
+    require!(
+        asset_id_a != asset_id_b,
+        TinySplError::CannotCombineSameAsset
+    );
 
     let cnft_metadata_account_a = &ctx.accounts.cnft_metadata_a;
     let cnft_metadata_a = get_cnft_metadata_from_account(cnft_metadata_account_a);
@@ -34,7 +38,7 @@ pub fn combine<'info>(
     // check asset a
     let (remaining_accounts_a, remaining_accounts_b) = ctx
         .remaining_accounts
-        .split_at(asset_a_proof_path_end_index);
+        .split_at(asset_a_proof_path_end_index as usize);
 
     let (calculated_asset_id_a, data_hash_a, creator_hash_a) = check_cnft(
         root_a,

@@ -93,7 +93,7 @@ pub mod tiny_spl {
         nonce_b: u64,
         index_a: u32,
         index_b: u32,
-        asset_a_proof_path_end_index: usize,
+        asset_a_proof_path_end_index: u32,
     ) -> Result<()> {
         processor::combine(
             ctx,

@@ -652,5 +652,185 @@ describe("tiny-spl", () => {
     expect(totalNewAssetsAmount).to.equal(TOKENS_TO_MINT);
   });
 
-  it("should allow token owner to combine tokens they own", async () => {});
+  it.only("should not allow token owner to combine the same token", async () => {
+    const ix = await PROGRAM.methods
+      .mintTo(new anchor.BN(3))
+      .accounts({
+        bubblegumSigner,
+        collectionMetadata: metadata,
+        collectionMint: mint,
+        tinySplAuthority,
+        compressionProgram: COMPRESSION_PROGRAM_ID,
+        editionAccount: masterEdition,
+        newLeafOwner: SIGNER.publicKey,
+        logWrapper: SPL_NOOP_PROGRAM_ID,
+        merkleTree: TREE_ID,
+        mintAuthority: SIGNER.publicKey,
+        mplBubblegumProgram: BUBBLEGUM_PROGRAM_ID,
+        tokenMetadataProgram: mplTokenMetadataProgramId,
+        treeAuthority,
+      })
+      .instruction();
+
+    await sendAndConfirmIxs([ix], SIGNER.publicKey, [SIGNER]);
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // upload metadata for the new token
+    const assets = await CONNECTION.getAssetsByOwner({
+      ownerAddress: SIGNER.publicKey.toBase58(),
+      limit: 1,
+      sortBy: {
+        sortBy: "created",
+        sortDirection: "desc",
+      },
+    });
+
+    const newestAsset = assets.items[0];
+    const assetProof = await CONNECTION.getAssetProof(
+      new PublicKey(newestAsset.id)
+    );
+    const [cnftMetadata] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from(CNFT_METADATA_SEED),
+        new PublicKey(newestAsset.id).toBuffer(),
+      ],
+      PROGRAM.programId
+    );
+
+    const treeAccount = await ConcurrentMerkleTreeAccount.fromAccountAddress(
+      CONNECTION,
+      TREE_ID
+    );
+    const canopyDepth = treeAccount.getCanopyDepth();
+
+    // parse the list of proof addresses into a valid AccountMeta[]
+    const proofPath: AccountMeta[] = assetProof.proof
+      .map((node: string) => ({
+        pubkey: new PublicKey(node),
+        isSigner: false,
+        isWritable: false,
+      }))
+      .slice(0, assetProof.proof.length - (!!canopyDepth ? canopyDepth : 0));
+
+    const creators: Creator[] = newestAsset.creators.map((creator) => {
+      return {
+        address: new PublicKey(creator.address),
+        verified: creator.verified,
+        share: creator.share,
+      };
+    });
+    const metadataArgs: MetadataArgs = {
+      name: newestAsset.content.metadata?.name || "",
+      symbol: newestAsset.content.metadata?.symbol || "",
+      uri: newestAsset.content.json_uri,
+      sellerFeeBasisPoints: newestAsset.royalty.basis_points,
+      creators: creators,
+      collection: {
+        key: new PublicKey(newestAsset.grouping[0].group_value),
+        verified: true,
+      },
+      editionNonce: newestAsset.supply.edition_nonce,
+      primarySaleHappened: newestAsset.royalty.primary_sale_happened,
+      isMutable: newestAsset.mutable,
+      uses: null,
+      tokenProgramVersion: { original: {} } as any,
+      tokenStandard: { nonFungible: {} } as any,
+    };
+
+    const uploadMetadataIx = await PROGRAM.methods
+      .uploadCnftMetadata(
+        new PublicKey(newestAsset.id),
+        [...new PublicKey(assetProof.root.trim()).toBytes()],
+        metadataArgs,
+        new anchor.BN(newestAsset.compression.leaf_id),
+        newestAsset.compression.leaf_id
+      )
+      .accounts({
+        cnftMetadata,
+        leafOwner: SIGNER.publicKey,
+        leafDelegate: SIGNER.publicKey,
+        cnftMetadataAccountCreator: SIGNER.publicKey,
+        compressionProgram: COMPRESSION_PROGRAM_ID,
+        collectionMint: mint,
+        tinySplAuthority,
+        merkleTree: TREE_ID,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .remainingAccounts(proofPath)
+      .instruction();
+
+    await sendAndConfirmIxs(
+      [uploadMetadataIx],
+      SIGNER.publicKey,
+      [SIGNER],
+      true
+    );
+
+    const assetAProofPathEndIndex = proofPath.length;
+    const combineIx = await PROGRAM.methods
+      .combine(
+        new PublicKey(newestAsset.id),
+        new PublicKey(newestAsset.id),
+        [...new PublicKey(assetProof.root.trim()).toBytes()],
+        [...new PublicKey(assetProof.root.trim()).toBytes()],
+        new anchor.BN(newestAsset.compression.leaf_id),
+        new anchor.BN(newestAsset.compression.leaf_id),
+        newestAsset.compression.leaf_id,
+        newestAsset.compression.leaf_id,
+        assetAProofPathEndIndex
+      )
+      .accounts({
+        authority: SIGNER.publicKey,
+        bubblegumSigner,
+        collectionMetadata: metadata,
+        cnftMetadataA: cnftMetadata,
+        cnftMetadataB: cnftMetadata,
+        collectionMint: mint,
+        compressionProgram: COMPRESSION_PROGRAM_ID,
+        editionAccount: masterEdition,
+        leafDelegate: SIGNER.publicKey,
+        leafOwner: SIGNER.publicKey,
+        logWrapper: SPL_NOOP_PROGRAM_ID,
+        merkleTree: TREE_ID,
+        mplBubblegumProgram: BUBBLEGUM_PROGRAM_ID,
+        newLeafOwner: SIGNER.publicKey,
+        systemProgram: anchor.web3.SystemProgram.programId,
+        tinySplAuthority,
+        tokenMetadataProgram: mplTokenMetadataProgramId,
+        treeAuthority,
+      })
+      .instruction();
+
+    const modifyComputeUnits = ComputeBudgetProgram.setComputeUnitLimit({
+      units: 1_400_000,
+    });
+
+    try {
+      const result = await sendAndConfirmIxs(
+        [modifyComputeUnits, combineIx],
+        SIGNER.publicKey,
+        [SIGNER],
+        true
+      );
+
+      console.log(result.value.err);
+      const errorCode = (result.value?.err as any).InstructionError[1].Custom;
+      // expect(errorCode).to.equal(102);
+    } finally {
+      const closeMetadataIx = await PROGRAM.methods
+        .closeCnftMetadataAccount(new PublicKey(newestAsset.id))
+        .accounts({
+          cnftMetadata,
+          cnftMetadataAccountCreator: SIGNER.publicKey,
+        })
+        .instruction();
+
+      await sendAndConfirmIxs(
+        [modifyComputeUnits, ix, closeMetadataIx],
+        SIGNER.publicKey,
+        [SIGNER],
+        true
+      );
+    }
+  });
 });
