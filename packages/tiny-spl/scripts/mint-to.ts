@@ -6,6 +6,7 @@ import {
   SIGNER,
   TOKEN_MINT_KEY,
   TREE_ID,
+  TREE_CREATOR,
 } from "./constants";
 import {
   PublicKey,
@@ -55,7 +56,7 @@ async function mintTo() {
   );
 
   const ix = await PROGRAM.methods
-    .mintTo(new BN(Number.MAX_SAFE_INTEGER))
+    .mintTo(new BN(69))
     .accounts({
       bubblegumSigner,
       collectionMetadata: metadata,
@@ -63,14 +64,14 @@ async function mintTo() {
       tinySplAuthority,
       compressionProgram: COMPRESSION_PROGRAM_ID,
       editionAccount: masterEdition,
-      leafDelegate: RECEIVER_ID,
-      leafOwner: RECEIVER_ID,
       logWrapper: SPL_NOOP_PROGRAM_ID,
       merkleTree: TREE_ID,
       mintAuthority: SIGNER.publicKey,
       mplBubblegumProgram: BUBBLEGUM_PROGRAM_ID,
       tokenMetadataProgram: mplTokenMetadataProgramId,
       treeAuthority,
+      newLeafOwner: RECEIVER_ID,
+      treeCreatorOrDelegate: TREE_CREATOR.publicKey,
     })
     .instruction();
 
@@ -83,7 +84,7 @@ async function mintTo() {
   }).compileToV0Message();
   const transaction = new VersionedTransaction(messageV0);
 
-  transaction.sign([SIGNER]);
+  transaction.sign([SIGNER, TREE_CREATOR]);
 
   console.log("Sending transaction...");
   const txid = await CONNECTION.sendTransaction(transaction, {

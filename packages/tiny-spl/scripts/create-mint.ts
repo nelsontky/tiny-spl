@@ -8,12 +8,17 @@ import {
 } from "./constants";
 import collectionMetadata from "./assets/metadata.json";
 import {
+  ComputeBudgetProgram,
   PublicKey,
   SYSVAR_INSTRUCTIONS_PUBKEY,
   TransactionMessage,
   VersionedTransaction,
 } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
+
+const computeBudgetIx = ComputeBudgetProgram.setComputeUnitPrice({
+  microLamports: 50000,
+});
 
 async function createMint() {
   const mplTokenMetadataProgramId = new PublicKey(
@@ -65,7 +70,7 @@ async function createMint() {
   const messageV0 = new TransactionMessage({
     payerKey: SIGNER.publicKey,
     recentBlockhash: blockhash,
-    instructions: [ix],
+    instructions: [computeBudgetIx, ix],
   }).compileToV0Message();
   const transaction = new VersionedTransaction(messageV0);
 

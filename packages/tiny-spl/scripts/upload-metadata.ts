@@ -15,7 +15,7 @@ import {
 import { chunk } from "lodash";
 import generateMetaData from "./generate-metadata";
 
-const PART_LENGTH = 900;
+const PART_LENGTH = 920;
 const TRANSACTION_CHUNK_SIZE = 3;
 
 const computeBudgetIx = ComputeBudgetProgram.setComputeUnitPrice({
@@ -23,12 +23,14 @@ const computeBudgetIx = ComputeBudgetProgram.setComputeUnitPrice({
 });
 
 const metadata = generateMetaData();
+
 (async () => {
   let metadataAccount: PublicKey;
   try {
     const metadataSize = Buffer.from(metadata).length;
     console.log("size:", metadataSize);
     metadataAccount = (await createMetadataAccount(metadataSize)).publicKey;
+
     await initializeMetadataAccount(metadataSize, metadataAccount);
 
     await uploadMetadata(metadata, metadataAccount);
@@ -117,15 +119,11 @@ export default async function initializeMetadataAccount(
 async function uploadMetadata(metadata: string, metadataAccount: PublicKey) {
   console.log("Uploading metadata...");
 
-  const transactionsCount = Math.ceil(metadata.length / PART_LENGTH);
   const metadataBuffer = Buffer.from(metadata);
+  const transactionsCount = Math.ceil(metadataBuffer.length / PART_LENGTH);
   const metadataBufferParts = Array.from(
     { length: transactionsCount },
-    (_, i) =>
-      metadataBuffer.subarray(
-        i * PART_LENGTH,
-        Math.min((i + 1) * PART_LENGTH, metadata.length)
-      )
+    (_, i) => metadataBuffer.subarray(i * PART_LENGTH, (i + 1) * PART_LENGTH)
   );
 
   const chunks = chunk(metadataBufferParts, TRANSACTION_CHUNK_SIZE);
@@ -192,7 +190,6 @@ async function logMetadata(metadataAccount: PublicKey) {
     payerKey: SIGNER.publicKey,
     recentBlockhash: blockhash,
     instructions: [
-      computeBudgetIx,
       ComputeBudgetProgram.setComputeUnitLimit({
         units: 14_000_000,
       }),

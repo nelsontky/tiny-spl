@@ -14,6 +14,10 @@ export const WRONG_AUTHORITY = Keypair.fromSecretKey(
   Uint8Array.from(JSON.parse(process.env.WRONG_AUTHORITY!))
 );
 
+export const TREE_CREATOR = Keypair.fromSecretKey(
+  Uint8Array.from(JSON.parse(process.env.TREE_CREATOR!))
+);
+
 export const CONNECTION = new WrapperConnection(
   process.env.RPC_URL!,
   "confirmed"
