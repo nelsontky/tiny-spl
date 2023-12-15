@@ -1,10 +1,13 @@
-use anchor_lang::{prelude::*, solana_program};
+use anchor_lang::{
+    prelude::*,
+    solana_program::{self, sysvar},
+};
 use anchor_spl::{
     metadata::{mpl_token_metadata, Metadata},
     token::Token,
 };
 
-use crate::{constants::TINY_SPL_AUTHORITY_SEED, error::TinySplError, state::TinySplAuthority, program_wrappers::SysVarInstructions};
+use crate::{constants::TINY_SPL_AUTHORITY_SEED, error::TinySplError, state::TinySplAuthority};
 
 pub fn create_mint(
     ctx: Context<CreateMint>,
@@ -123,7 +126,9 @@ pub struct CreateMint<'info> {
     )]
     pub tiny_spl_authority: Box<Account<'info, TinySplAuthority>>,
     pub system_program: Program<'info, System>,
-    pub sysvar_instructions: Program<'info, SysVarInstructions>,
+    /// CHECK: checked in accounts constraint
+    #[account(address = sysvar::instructions::id())]
+    pub sysvar_instructions: AccountInfo<'info>,
     pub spl_token_program: Program<'info, Token>,
     pub mpl_token_metadata_program: Program<'info, Metadata>,
 }
@@ -142,7 +147,8 @@ pub struct CreateNftCollection<'info> {
     pub payer: AccountInfo<'info>,
     /// CHECK: checked in cpi to mpl token metadata
     pub update_authority: AccountInfo<'info>,
-    pub sysvar_instructions: Program<'info, SysVarInstructions>,
+    /// CHECK: checked in account constraint
+    pub sysvar_instructions: AccountInfo<'info>,
     pub system_program: Program<'info, System>,
     pub spl_token_program: Program<'info, Token>,
 }
