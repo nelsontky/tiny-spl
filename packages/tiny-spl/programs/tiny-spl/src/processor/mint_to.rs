@@ -3,8 +3,9 @@ use anchor_spl::metadata::{mpl_token_metadata, Metadata};
 
 use crate::{
     constants::TINY_SPL_AUTHORITY_SEED,
+    program_wrappers::{MplBubblegum, Noop, SplCompression},
     state::TinySplAuthority,
-    utils::{get_mint_tiny_spl_args, mint_tiny_spl_to_collection, MintTinySplToCollection}, program_wrappers::{Noop, MplBubblegum, SplCompression},
+    utils::{get_mint_tiny_spl_args, mint_tiny_spl_to_collection, MintTinySplToCollection},
 };
 
 pub fn mint_to(ctx: Context<MintTo>, amount: u64) -> Result<()> {

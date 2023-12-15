@@ -6,7 +6,7 @@ pub fn mint_tiny_spl_to_collection<'info>(
     ctx: CpiContext<'_, '_, '_, 'info, MintTinySplToCollection<'info>>,
     mint_tiny_spl_args: MintTinySplArgs,
 ) -> Result<()> {
-    let ix = mpl_bubblegum::instructions::MintToCollectionV1 {
+    let mut ix = mpl_bubblegum::instructions::MintToCollectionV1 {
         tree_config: *ctx.accounts.tree_config.key,
         leaf_owner: *ctx.accounts.new_leaf_owner.key,
         leaf_delegate: *ctx.accounts.new_leaf_owner.key,
@@ -49,6 +49,12 @@ pub fn mint_tiny_spl_to_collection<'info>(
             },
         },
     );
+
+    ix.accounts.push(AccountMeta {
+        pubkey: ctx.accounts.tiny_spl_authority.key(),
+        is_signer: false,
+        is_writable: false,
+    });
 
     solana_program::program::invoke_signed(
         &ix,
