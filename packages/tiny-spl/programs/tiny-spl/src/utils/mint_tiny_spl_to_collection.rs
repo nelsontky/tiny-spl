@@ -12,7 +12,7 @@ pub fn mint_tiny_spl_to_collection<'info>(
         leaf_delegate: *ctx.accounts.new_leaf_owner.key,
         merkle_tree: *ctx.accounts.merkle_tree.key,
         payer: *ctx.accounts.payer.key,
-        tree_creator_or_delegate: ctx.accounts.tiny_spl_authority.key(),
+        tree_creator_or_delegate: ctx.accounts.tree_creator_or_delegate.key(),
         collection_authority: ctx.accounts.tiny_spl_authority.key(),
         collection_authority_record_pda: None,
         collection_mint: *ctx.accounts.collection_mint.key,
@@ -78,6 +78,8 @@ pub struct MintTinySplToCollection<'info> {
     pub bubblegum_signer: AccountInfo<'info>,
     /// CHECK: checked in cpi to bubblegum
     pub tiny_spl_authority: AccountInfo<'info>,
+    /// CHECK: checked in cpi to bubblegum
+    pub tree_creator_or_delegate: AccountInfo<'info>,
     /// CHECK: checked in cpi to bubblegum
     pub log_wrapper: AccountInfo<'info>,
     /// CHECK: checked in cpi to bubblegum

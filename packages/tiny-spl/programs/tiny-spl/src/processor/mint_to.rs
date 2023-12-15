@@ -30,6 +30,7 @@ pub fn mint_to(ctx: Context<MintTo>, amount: u64) -> Result<()> {
             new_leaf_owner: ctx.accounts.new_leaf_owner.to_account_info(),
             merkle_tree: ctx.accounts.merkle_tree.to_account_info(),
             payer: ctx.accounts.mint_authority.to_account_info(),
+            tree_creator_or_delegate: ctx.accounts.tree_creator_or_delegate.to_account_info(),
             collection_mint: ctx.accounts.collection_mint.to_account_info(),
             collection_metadata: ctx.accounts.collection_metadata.to_account_info(),
             collection_edition: ctx.accounts.edition_account.to_account_info(),
@@ -69,6 +70,7 @@ pub struct MintTo<'info> {
     /// CHECK: checked in cpi to account compression
     pub merkle_tree: UncheckedAccount<'info>,
     pub mint_authority: Signer<'info>,
+    pub tree_creator_or_delegate: Signer<'info>,
     /// CHECK: checked in cpi to bubblegum
     pub collection_mint: UncheckedAccount<'info>,
     #[account(mut)]

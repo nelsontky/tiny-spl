@@ -130,6 +130,7 @@ pub fn combine<'info>(
             new_leaf_owner: ctx.accounts.new_leaf_owner.to_account_info(),
             merkle_tree: ctx.accounts.merkle_tree.to_account_info(),
             payer: ctx.accounts.authority.to_account_info(),
+            tree_creator_or_delegate: ctx.accounts.tree_creator_or_delegate.to_account_info(),
             collection_mint: ctx.accounts.collection_mint.to_account_info(),
             collection_metadata: ctx.accounts.collection_metadata.to_account_info(),
             collection_edition: ctx.accounts.edition_account.to_account_info(),
@@ -182,6 +183,7 @@ pub struct Combine<'info> {
             || leaf_delegate.key() == authority.key()
     )]
     pub authority: Signer<'info>,
+    pub tree_creator_or_delegate: Signer<'info>,
     /// CHECK: This account is checked in instruction
     pub leaf_owner: UncheckedAccount<'info>,
     /// CHECK: This account is checked in instruction

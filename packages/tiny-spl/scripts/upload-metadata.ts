@@ -15,6 +15,13 @@ import {
 import { chunk } from "lodash";
 import generateMetaData from "./generate-metadata";
 
+const PART_LENGTH = 900;
+const TRANSACTION_CHUNK_SIZE = 3;
+
+const computeBudgetIx = ComputeBudgetProgram.setComputeUnitPrice({
+  microLamports: 50000,
+});
+
 const metadata = generateMetaData();
 (async () => {
   let metadataAccount: PublicKey;
@@ -23,6 +30,7 @@ const metadata = generateMetaData();
     console.log("size:", metadataSize);
     metadataAccount = (await createMetadataAccount(metadataSize)).publicKey;
     await initializeMetadataAccount(metadataSize, metadataAccount);
+
     await uploadMetadata(metadata, metadataAccount);
     const txId = await logMetadata(metadataAccount);
     console.log(`Metadata txId: https://solscan.io/tx/${txId}`);
@@ -55,7 +63,7 @@ async function createMetadataAccount(metadataSize: number) {
   const messageV0 = new TransactionMessage({
     payerKey: SIGNER.publicKey,
     recentBlockhash: blockhash,
-    instructions: [ix],
+    instructions: [computeBudgetIx, ix],
   }).compileToV0Message();
   const transaction = new VersionedTransaction(messageV0);
   transaction.sign([SIGNER, metadataAccount]);
@@ -91,7 +99,7 @@ export default async function initializeMetadataAccount(
   const messageV0 = new TransactionMessage({
     payerKey: SIGNER.publicKey,
     recentBlockhash: blockhash,
-    instructions: [ix],
+    instructions: [computeBudgetIx, ix],
   }).compileToV0Message();
   const transaction = new VersionedTransaction(messageV0);
   transaction.sign([SIGNER]);
@@ -105,9 +113,6 @@ export default async function initializeMetadataAccount(
     signature: txid,
   });
 }
-
-const PART_LENGTH = 981;
-const TRANSACTION_CHUNK_SIZE = 6;
 
 async function uploadMetadata(metadata: string, metadataAccount: PublicKey) {
   console.log("Uploading metadata...");
@@ -132,7 +137,7 @@ async function uploadMetadata(metadata: string, metadataAccount: PublicKey) {
       chunk.map(async (part, j) => {
         const index = (i * TRANSACTION_CHUNK_SIZE + j) * PART_LENGTH;
         const ix = await PROGRAM.methods
-          .uploadMetadata(index, part)
+          .uploadLoggingMetadata(index, part)
           .accounts({
             authority: SIGNER.publicKey,
             metadata: metadataAccount,
@@ -144,13 +149,13 @@ async function uploadMetadata(metadata: string, metadataAccount: PublicKey) {
         const messageV0 = new TransactionMessage({
           payerKey: SIGNER.publicKey,
           recentBlockhash: blockhash,
-          instructions: [ix],
+          instructions: [computeBudgetIx, ix],
         }).compileToV0Message();
         const transaction = new VersionedTransaction(messageV0);
         transaction.sign([SIGNER]);
 
         const txid = await CONNECTION.sendTransaction(transaction, {
-          skipPreflight: false,
+          skipPreflight: true,
         });
         await CONNECTION.confirmTransaction({
           blockhash,
@@ -187,6 +192,7 @@ async function logMetadata(metadataAccount: PublicKey) {
     payerKey: SIGNER.publicKey,
     recentBlockhash: blockhash,
     instructions: [
+      computeBudgetIx,
       ComputeBudgetProgram.setComputeUnitLimit({
         units: 14_000_000,
       }),
@@ -224,7 +230,7 @@ async function closeMetadataAccount(metadataAccount: PublicKey) {
   const messageV0 = new TransactionMessage({
     payerKey: SIGNER.publicKey,
     recentBlockhash: blockhash,
-    instructions: [ix],
+    instructions: [computeBudgetIx, ix],
   }).compileToV0Message();
   const transaction = new VersionedTransaction(messageV0);
   transaction.sign([SIGNER]);
