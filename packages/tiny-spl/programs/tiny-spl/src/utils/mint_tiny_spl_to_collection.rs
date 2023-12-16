@@ -3,7 +3,7 @@ use anchor_lang::{prelude::*, solana_program};
 use crate::state::MintTinySplArgs;
 
 pub fn mint_tiny_spl_to_collection<'info>(
-    ctx: CpiContext<'_, '_, '_, 'info, MintTinySplToCollection<'info>>,
+    ctx: &CpiContext<'_, '_, '_, 'info, MintTinySplToCollection<'info>>,
     mint_tiny_spl_args: MintTinySplArgs,
 ) -> Result<()> {
     let mut ix = mpl_bubblegum::instructions::MintToCollectionV1 {
@@ -58,7 +58,7 @@ pub fn mint_tiny_spl_to_collection<'info>(
 
     solana_program::program::invoke_signed(
         &ix,
-        &ToAccountInfos::to_account_infos(&ctx),
+        &ToAccountInfos::to_account_infos(ctx),
         ctx.signer_seeds,
     )
     .map_err(Into::into)

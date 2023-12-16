@@ -48,7 +48,7 @@ pub fn mint_to(ctx: Context<MintTo>, amount: u64) -> Result<()> {
     let collection_mint = ctx.accounts.collection_mint.key().to_string();
     let symbol = collection_metadata.symbol;
     mint_tiny_spl_to_collection(
-        cpi_context,
+        &cpi_context,
         get_mint_tiny_spl_args(symbol, amount, collection_mint),
     )?;
 

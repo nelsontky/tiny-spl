@@ -4,11 +4,12 @@ use anchor_spl::metadata::{mpl_token_metadata, Metadata};
 use crate::{
     constants::{CNFT_METADATA_SEED, TINY_SPL_AUTHORITY_SEED},
     error::TinySplError,
+    program_wrappers::{MplBubblegum, Noop, SplCompression},
     state::{CnftMetadata, TinySplAuthority},
     utils::{
         burn_cnft, check_cnft, get_cnft_metadata_from_account, get_mint_tiny_spl_args,
         mint_tiny_spl_to_collection, verify_token_splits, BurnCnft, MintTinySplToCollection,
-    }, program_wrappers::{Noop, SplCompression, MplBubblegum},
+    },
 };
 
 pub fn split<'info>(
@@ -78,33 +79,32 @@ pub fn split<'info>(
         mint_pubkey.as_ref(),
         &[ctx.bumps.tiny_spl_authority],
     ]];
+    let mint_cpi_context = CpiContext::new_with_signer(
+        ctx.accounts.mpl_bubblegum_program.to_account_info(),
+        MintTinySplToCollection {
+            tree_config: ctx.accounts.tree_authority.to_account_info(),
+            new_leaf_owner: ctx.accounts.new_leaf_owner.to_account_info(),
+            merkle_tree: ctx.accounts.merkle_tree.to_account_info(),
+            payer: ctx.accounts.authority.to_account_info(),
+            tree_creator_or_delegate: ctx.accounts.tree_creator_or_delegate.to_account_info(),
+            collection_mint: ctx.accounts.collection_mint.to_account_info(),
+            collection_metadata: ctx.accounts.collection_metadata.to_account_info(),
+            collection_edition: ctx.accounts.edition_account.to_account_info(),
+            bubblegum_signer: ctx.accounts.bubblegum_signer.to_account_info(),
+            tiny_spl_authority: ctx.accounts.tiny_spl_authority.to_account_info(),
+            log_wrapper: ctx.accounts.log_wrapper.to_account_info(),
+            compression_program: ctx.accounts.compression_program.to_account_info(),
+            system_program: ctx.accounts.system_program.to_account_info(),
+            token_metadata_program: ctx.accounts.token_metadata_program.to_account_info(),
+        },
+        &tiny_spl_seeds,
+    );
+    let collection_mint = ctx.accounts.collection_mint.key().to_string();
+    let symbol = collection_metadata.symbol;
     for amount in amounts {
-        let mint_cpi_context = CpiContext::new_with_signer(
-            ctx.accounts.mpl_bubblegum_program.to_account_info(),
-            MintTinySplToCollection {
-                tree_config: ctx.accounts.tree_authority.to_account_info(),
-                new_leaf_owner: ctx.accounts.new_leaf_owner.to_account_info(),
-                merkle_tree: ctx.accounts.merkle_tree.to_account_info(),
-                payer: ctx.accounts.authority.to_account_info(),
-                tree_creator_or_delegate: ctx.accounts.tree_creator_or_delegate.to_account_info(),
-                collection_mint: ctx.accounts.collection_mint.to_account_info(),
-                collection_metadata: ctx.accounts.collection_metadata.to_account_info(),
-                collection_edition: ctx.accounts.edition_account.to_account_info(),
-                bubblegum_signer: ctx.accounts.bubblegum_signer.to_account_info(),
-                tiny_spl_authority: ctx.accounts.tiny_spl_authority.to_account_info(),
-                log_wrapper: ctx.accounts.log_wrapper.to_account_info(),
-                compression_program: ctx.accounts.compression_program.to_account_info(),
-                system_program: ctx.accounts.system_program.to_account_info(),
-                token_metadata_program: ctx.accounts.token_metadata_program.to_account_info(),
-            },
-            &tiny_spl_seeds,
-        );
-
-        let collection_mint = ctx.accounts.collection_mint.key().to_string();
-        let symbol = collection_metadata.symbol.clone();
         mint_tiny_spl_to_collection(
-            mint_cpi_context,
-            get_mint_tiny_spl_args(symbol, amount, collection_mint),
+            &mint_cpi_context,
+            get_mint_tiny_spl_args(symbol.clone(), amount, collection_mint.clone()),
         )?;
     }
     Ok(())

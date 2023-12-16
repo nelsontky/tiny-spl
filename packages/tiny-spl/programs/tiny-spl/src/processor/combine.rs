@@ -151,7 +151,7 @@ pub fn combine<'info>(
     let token_amount_b = get_token_amount(&cnft_metadata_b).unwrap();
     let combined_amount = token_amount_a.checked_add(token_amount_b).unwrap();
     mint_tiny_spl_to_collection(
-        mint_cpi_context,
+        &mint_cpi_context,
         get_mint_tiny_spl_args(symbol, combined_amount, collection_mint),
     )?;
 
