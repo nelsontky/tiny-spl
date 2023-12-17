@@ -1,81 +1,46 @@
+use std::collections::HashSet;
+
 use anchor_lang::prelude::*;
 use anchor_spl::metadata::{mpl_token_metadata, Metadata};
 
 use crate::{
-    constants::{CNFT_METADATA_SEED, TINY_SPL_AUTHORITY_SEED},
+    constants::TINY_SPL_AUTHORITY_SEED,
     error::TinySplError,
     program_wrappers::{MplBubblegum, Noop, SplCompression},
-    state::{CnftMetadata, TinySplAuthority},
+    state::TinySplAuthority,
     utils::{
-        burn_cnft, verify_cnft_metadata, get_cnft_metadata_from_account, get_mint_tiny_spl_args,
-        get_token_amount, mint_tiny_spl_to_collection, BurnCnft, MintTinySplToCollection,
+        burn_cnft, get_tiny_spl_metadata, mint_tiny_spl_to_collection, verify_cnft_metadata,
+        BurnCnft, MintTinySplToCollection,
     },
 };
 
 pub fn combine<'info>(
     ctx: Context<'_, '_, '_, 'info, Combine<'info>>,
-    asset_id_a: Pubkey,
-    asset_id_b: Pubkey,
-    root_a: [u8; 32],
-    root_b: [u8; 32],
-    nonce_a: u64,
-    nonce_b: u64,
-    index_a: u32,
-    index_b: u32,
-    asset_a_proof_path_end_index: u32,
+    amounts: Vec<u64>,
+    asset_ids: Vec<Pubkey>,
+    roots: Vec<[u8; 32]>,
+    nonces: Vec<u64>,
+    indexes: Vec<u32>,
+    proof_path_end_indexes_exclusive: Vec<u32>,
 ) -> Result<()> {
     require!(
-        asset_id_a != asset_id_b,
+        amounts.len() == asset_ids.len()
+            && amounts.len() == roots.len()
+            && amounts.len() == nonces.len()
+            && amounts.len() == indexes.len()
+            && amounts.len() == proof_path_end_indexes_exclusive.len(),
+        TinySplError::InvalidCombineParameters
+    );
+
+    let mut asset_id_set = HashSet::new();
+    asset_ids.iter().for_each(|x| {
+        asset_id_set.insert(x);
+    });
+    require!(
+        asset_id_set.len() == asset_ids.len(),
         TinySplError::CannotCombineSameAsset
     );
 
-    let cnft_metadata_account_a = &ctx.accounts.cnft_metadata_a;
-    let cnft_metadata_a = get_cnft_metadata_from_account(cnft_metadata_account_a);
-
-    let cnft_metadata_account_b = &ctx.accounts.cnft_metadata_b;
-    let cnft_metadata_b = get_cnft_metadata_from_account(cnft_metadata_account_b);
-
-    // check asset a
-    let (remaining_accounts_a, remaining_accounts_b) = ctx
-        .remaining_accounts
-        .split_at(asset_a_proof_path_end_index as usize);
-
-    let (calculated_asset_id_a, data_hash_a, creator_hash_a) = verify_cnft_metadata(
-        root_a,
-        &cnft_metadata_a,
-        nonce_a,
-        index_a,
-        &ctx.accounts.merkle_tree.to_account_info(),
-        &ctx.accounts.leaf_owner.to_account_info(),
-        &ctx.accounts.leaf_delegate.to_account_info(),
-        &ctx.accounts.collection_mint.to_account_info(),
-        &ctx.accounts.compression_program.to_account_info(),
-        remaining_accounts_a,
-    )?;
-    require!(
-        calculated_asset_id_a == asset_id_a,
-        TinySplError::AssetIdMismatch
-    );
-
-    // check asset b
-    let (calculated_asset_id_b, data_hash_b, creator_hash_b) = verify_cnft_metadata(
-        root_b,
-        &cnft_metadata_b,
-        nonce_b,
-        index_b,
-        &ctx.accounts.merkle_tree.to_account_info(),
-        &ctx.accounts.leaf_owner.to_account_info(),
-        &ctx.accounts.leaf_delegate.to_account_info(),
-        &ctx.accounts.collection_mint.to_account_info(),
-        &ctx.accounts.compression_program.to_account_info(),
-        remaining_accounts_b,
-    )?;
-    require!(
-        calculated_asset_id_b == asset_id_b,
-        TinySplError::AssetIdMismatch
-    );
-
-    // burn assets a and b
     let burn_cpi_context = CpiContext::new(
         ctx.accounts.mpl_bubblegum_program.to_account_info(),
         BurnCnft {
@@ -88,26 +53,7 @@ pub fn combine<'info>(
             system_program: ctx.accounts.system_program.to_account_info(),
         },
     );
-    burn_cnft(
-        &burn_cpi_context,
-        root_a,
-        data_hash_a,
-        creator_hash_a,
-        nonce_a,
-        index_a,
-        remaining_accounts_a,
-    )?;
-    burn_cnft(
-        &burn_cpi_context,
-        root_b,
-        data_hash_b,
-        creator_hash_b,
-        nonce_b,
-        index_b,
-        remaining_accounts_b,
-    )?;
 
-    // mint new cnft
     let collection_metadata = mpl_token_metadata::accounts::Metadata::safe_deserialize(
         ctx.accounts
             .collection_metadata
@@ -116,6 +62,55 @@ pub fn combine<'info>(
             .unwrap()
             .as_ref(),
     )?;
+    for (i, asset_id) in asset_ids.iter().enumerate() {
+        let amount = amounts[i];
+        let root = roots[i];
+        let nonce = nonces[i];
+        let index = indexes[i];
+        let proof_path_end_index_exclusive = proof_path_end_indexes_exclusive[i];
+        let proof_path_start_index = if i == 0 {
+            0
+        } else {
+            proof_path_end_indexes_exclusive[i - 1]
+        };
+        let remaining_accounts = &ctx.remaining_accounts[proof_path_start_index.try_into().unwrap()
+            ..proof_path_end_index_exclusive.try_into().unwrap()];
+
+        let cnft_metadata = get_tiny_spl_metadata(
+            collection_metadata.symbol.clone(),
+            amount,
+            ctx.accounts.collection_mint.key(),
+            ctx.accounts.tiny_spl_authority.key(),
+        );
+
+        let (calculated_asset_id, data_hash, creator_hash) = verify_cnft_metadata(
+            root,
+            &cnft_metadata,
+            nonce,
+            index,
+            &ctx.accounts.merkle_tree.to_account_info(),
+            &ctx.accounts.leaf_owner.to_account_info(),
+            &ctx.accounts.leaf_delegate.to_account_info(),
+            &ctx.accounts.collection_mint.to_account_info(),
+            &ctx.accounts.compression_program.to_account_info(),
+            remaining_accounts,
+        )?;
+
+        require!(
+            calculated_asset_id == *asset_id,
+            TinySplError::AssetIdMismatch
+        );
+
+        burn_cnft(
+            &burn_cpi_context,
+            root,
+            data_hash,
+            creator_hash,
+            nonce,
+            index,
+            remaining_accounts,
+        )?;
+    }
 
     let mint_pubkey = ctx.accounts.collection_mint.key();
     let tiny_spl_seeds: &[&[&[u8]]] = &[&[
@@ -144,39 +139,21 @@ pub fn combine<'info>(
         &tiny_spl_seeds,
     );
 
-    let collection_mint = ctx.accounts.collection_mint.key().to_string();
-    let symbol = collection_metadata.symbol.clone();
-
-    let token_amount_a = get_token_amount(&cnft_metadata_a).unwrap();
-    let token_amount_b = get_token_amount(&cnft_metadata_b).unwrap();
-    let combined_amount = token_amount_a.checked_add(token_amount_b).unwrap();
     mint_tiny_spl_to_collection(
         &mint_cpi_context,
-        get_mint_tiny_spl_args(symbol, combined_amount, collection_mint),
+        get_tiny_spl_metadata(
+            collection_metadata.symbol,
+            amounts.into_iter().sum(),
+            ctx.accounts.collection_mint.key(),
+            ctx.accounts.tiny_spl_authority.key(),
+        ),
     )?;
 
     Ok(())
 }
 
 #[derive(Accounts)]
-#[instruction(asset_id_a: Pubkey, asset_id_b: Pubkey)]
 pub struct Combine<'info> {
-    #[account(
-        seeds = [
-            CNFT_METADATA_SEED,
-            asset_id_a.as_ref(),
-        ],
-        bump
-    )]
-    pub cnft_metadata_a: Box<Account<'info, CnftMetadata>>,
-    #[account(
-      seeds = [
-          CNFT_METADATA_SEED,
-          asset_id_b.as_ref(),
-      ],
-      bump
-    )]
-    pub cnft_metadata_b: Box<Account<'info, CnftMetadata>>,
     #[account(
         mut,
         constraint = leaf_owner.key() == authority.key()

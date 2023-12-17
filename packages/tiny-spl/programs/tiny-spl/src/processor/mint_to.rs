@@ -5,7 +5,7 @@ use crate::{
     constants::TINY_SPL_AUTHORITY_SEED,
     program_wrappers::{MplBubblegum, Noop, SplCompression},
     state::TinySplAuthority,
-    utils::{get_mint_tiny_spl_args, mint_tiny_spl_to_collection, MintTinySplToCollection},
+    utils::{get_tiny_spl_metadata, mint_tiny_spl_to_collection, MintTinySplToCollection},
 };
 
 pub fn mint_to(ctx: Context<MintTo>, amount: u64) -> Result<()> {
@@ -45,11 +45,14 @@ pub fn mint_to(ctx: Context<MintTo>, amount: u64) -> Result<()> {
         &seeds,
     );
 
-    let collection_mint = ctx.accounts.collection_mint.key().to_string();
-    let symbol = collection_metadata.symbol;
     mint_tiny_spl_to_collection(
         &cpi_context,
-        get_mint_tiny_spl_args(symbol, amount, collection_mint),
+        get_tiny_spl_metadata(
+            collection_metadata.symbol,
+            amount,
+            ctx.accounts.collection_mint.key(),
+            ctx.accounts.tiny_spl_authority.key(),
+        ),
     )?;
 
     let tiny_spl_authority = &mut ctx.accounts.tiny_spl_authority;

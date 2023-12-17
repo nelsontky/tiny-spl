@@ -16,6 +16,8 @@ pub enum TinySplError {
     AssetIdMismatch,
     #[msg("Invalid split amounts supplied")]
     InvalidSplitAmounts,
-    #[msg("Cannot combine 2 of the same asset")]
+    #[msg("Cannot combine more than 1 of the same asset")]
     CannotCombineSameAsset,
+    #[msg("Different number of parameters supplied for combining")]
+    InvalidCombineParameters,
 }

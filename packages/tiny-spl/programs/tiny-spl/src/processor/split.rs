@@ -30,7 +30,7 @@ pub fn split<'info>(
             .as_ref(),
     )?;
     let cnft_metadata = get_tiny_spl_metadata(
-        collection_metadata.symbol,
+        collection_metadata.symbol.clone(),
         source_amount,
         ctx.accounts.collection_mint.key(),
         ctx.accounts.tiny_spl_authority.key(),
@@ -107,7 +107,7 @@ pub fn split<'info>(
         mint_tiny_spl_to_collection(
             &mint_cpi_context,
             get_tiny_spl_metadata(
-                collection_metadata.symbol,
+                collection_metadata.symbol.clone(),
                 amount,
                 ctx.accounts.collection_mint.key(),
                 ctx.accounts.tiny_spl_authority.key(),
@@ -118,7 +118,6 @@ pub fn split<'info>(
 }
 
 #[derive(Accounts)]
-#[instruction(asset_id: Pubkey)]
 pub struct Split<'info> {
     #[account(
         mut,
