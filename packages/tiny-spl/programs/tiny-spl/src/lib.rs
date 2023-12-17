@@ -12,7 +12,6 @@ use anchor_lang::{
     solana_program::entrypoint::{HEAP_LENGTH, HEAP_START_ADDRESS},
 };
 use processor::*;
-use state::CnftMetadata;
 
 declare_id!("tsP1jf31M3iGNPmANP3ep3iWCMTxpMFLNbewWVWWbSo");
 
@@ -52,17 +51,6 @@ pub mod tiny_spl {
 
     pub fn mint_to(ctx: Context<MintTo>, amount: u64) -> Result<()> {
         processor::mint_to(ctx, amount)
-    }
-
-    pub fn upload_cnft_metadata<'info>(
-        ctx: Context<'_, '_, '_, 'info, UploadCnftMetadata<'info>>,
-        asset_id: Pubkey,
-        root: [u8; 32],
-        cnft_metadata: CnftMetadata,
-        nonce: u64,
-        index: u32,
-    ) -> Result<()> {
-        processor::upload_cnft_metadata(ctx, asset_id, root, cnft_metadata, nonce, index)
     }
 
     pub fn split<'info>(
