@@ -1,7 +1,7 @@
 mod constants;
 mod error;
-mod program_wrappers;
 mod processor;
+mod program_wrappers;
 mod state;
 mod utils;
 
@@ -55,13 +55,14 @@ pub mod tiny_spl {
 
     pub fn split<'info>(
         ctx: Context<'_, '_, '_, 'info, Split<'info>>,
+        source_amount: u64,
         asset_id: Pubkey,
         root: [u8; 32],
         nonce: u64,
         index: u32,
         amounts: Vec<u64>,
     ) -> Result<()> {
-        processor::split(ctx, asset_id, root, nonce, index, amounts)
+        processor::split(ctx, source_amount, asset_id, root, nonce, index, amounts)
     }
 
     pub fn close_cnft_metadata_account(
