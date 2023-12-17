@@ -5,7 +5,6 @@ mod init_logging_metadata_account;
 mod log_metadata;
 mod close_metadata_account;
 mod split;
-mod close_cnft_metadata_account;
 mod combine;
 
 pub use create_mint::*;
@@ -15,5 +14,4 @@ pub use init_logging_metadata_account::*;
 pub use log_metadata::*;
 pub use close_metadata_account::*;
 pub use split::*;
-pub use close_cnft_metadata_account::*;
 pub use combine::*;
