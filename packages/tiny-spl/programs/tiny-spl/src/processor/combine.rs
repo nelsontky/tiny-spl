@@ -7,7 +7,7 @@ use crate::{
     program_wrappers::{MplBubblegum, Noop, SplCompression},
     state::{CnftMetadata, TinySplAuthority},
     utils::{
-        burn_cnft, check_cnft, get_cnft_metadata_from_account, get_mint_tiny_spl_args,
+        burn_cnft, verify_cnft_metadata, get_cnft_metadata_from_account, get_mint_tiny_spl_args,
         get_token_amount, mint_tiny_spl_to_collection, BurnCnft, MintTinySplToCollection,
     },
 };
@@ -40,7 +40,7 @@ pub fn combine<'info>(
         .remaining_accounts
         .split_at(asset_a_proof_path_end_index as usize);
 
-    let (calculated_asset_id_a, data_hash_a, creator_hash_a) = check_cnft(
+    let (calculated_asset_id_a, data_hash_a, creator_hash_a) = verify_cnft_metadata(
         root_a,
         &cnft_metadata_a,
         nonce_a,
@@ -58,7 +58,7 @@ pub fn combine<'info>(
     );
 
     // check asset b
-    let (calculated_asset_id_b, data_hash_b, creator_hash_b) = check_cnft(
+    let (calculated_asset_id_b, data_hash_b, creator_hash_b) = verify_cnft_metadata(
         root_b,
         &cnft_metadata_b,
         nonce_b,

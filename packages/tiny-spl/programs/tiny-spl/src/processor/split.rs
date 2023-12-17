@@ -2,28 +2,41 @@ use anchor_lang::prelude::*;
 use anchor_spl::metadata::{mpl_token_metadata, Metadata};
 
 use crate::{
-    constants::{CNFT_METADATA_SEED, TINY_SPL_AUTHORITY_SEED},
+    constants::TINY_SPL_AUTHORITY_SEED,
     error::TinySplError,
     program_wrappers::{MplBubblegum, Noop, SplCompression},
-    state::{CnftMetadata, TinySplAuthority},
+    state::TinySplAuthority,
     utils::{
-        burn_cnft, check_cnft, get_cnft_metadata_from_account, get_mint_tiny_spl_args,
-        mint_tiny_spl_to_collection, verify_token_splits, BurnCnft, MintTinySplToCollection,
+        burn_cnft, get_tiny_spl_metadata, mint_tiny_spl_to_collection, verify_cnft_metadata,
+        verify_token_splits, BurnCnft, MintTinySplToCollection,
     },
 };
 
 pub fn split<'info>(
     ctx: Context<'_, '_, '_, 'info, Split<'info>>,
+    source_amount: u64,
     asset_id: Pubkey,
     root: [u8; 32],
     nonce: u64,
     index: u32,
-    amounts: Vec<u64>,
+    destination_amounts: Vec<u64>,
 ) -> Result<()> {
-    let cnft_metadata_account = &ctx.accounts.cnft_metadata;
-    let cnft_metadata = get_cnft_metadata_from_account(cnft_metadata_account);
+    let collection_metadata = mpl_token_metadata::accounts::Metadata::safe_deserialize(
+        ctx.accounts
+            .collection_metadata
+            .data
+            .try_borrow()
+            .unwrap()
+            .as_ref(),
+    )?;
+    let cnft_metadata = get_tiny_spl_metadata(
+        collection_metadata.symbol,
+        source_amount,
+        ctx.accounts.collection_mint.key(),
+        ctx.accounts.tiny_spl_authority.key(),
+    );
 
-    let (calculated_asset_id, data_hash, creator_hash) = check_cnft(
+    let (calculated_asset_id, data_hash, creator_hash) = verify_cnft_metadata(
         root,
         &cnft_metadata,
         nonce,
@@ -40,7 +53,7 @@ pub fn split<'info>(
         TinySplError::AssetIdMismatch
     );
 
-    verify_token_splits(&cnft_metadata, &amounts)?;
+    verify_token_splits(source_amount, &destination_amounts)?;
 
     let burn_cpi_context = CpiContext::new(
         ctx.accounts.mpl_bubblegum_program.to_account_info(),
@@ -62,15 +75,6 @@ pub fn split<'info>(
         nonce,
         index,
         ctx.remaining_accounts,
-    )?;
-
-    let collection_metadata = mpl_token_metadata::accounts::Metadata::safe_deserialize(
-        ctx.accounts
-            .collection_metadata
-            .data
-            .try_borrow()
-            .unwrap()
-            .as_ref(),
     )?;
 
     let mint_pubkey = ctx.accounts.collection_mint.key();
@@ -99,12 +103,15 @@ pub fn split<'info>(
         },
         &tiny_spl_seeds,
     );
-    let collection_mint = ctx.accounts.collection_mint.key().to_string();
-    let symbol = collection_metadata.symbol;
-    for amount in amounts {
+    for amount in destination_amounts {
         mint_tiny_spl_to_collection(
             &mint_cpi_context,
-            get_mint_tiny_spl_args(symbol.clone(), amount, collection_mint.clone()),
+            get_tiny_spl_metadata(
+                collection_metadata.symbol,
+                amount,
+                ctx.accounts.collection_mint.key(),
+                ctx.accounts.tiny_spl_authority.key(),
+            ),
         )?;
     }
     Ok(())
@@ -113,14 +120,6 @@ pub fn split<'info>(
 #[derive(Accounts)]
 #[instruction(asset_id: Pubkey)]
 pub struct Split<'info> {
-    #[account(
-        seeds = [
-            CNFT_METADATA_SEED,
-            asset_id.as_ref(),
-        ],
-        bump
-    )]
-    pub cnft_metadata: Box<Account<'info, CnftMetadata>>,
     #[account(
         mut,
         constraint = leaf_owner.key() == authority.key()

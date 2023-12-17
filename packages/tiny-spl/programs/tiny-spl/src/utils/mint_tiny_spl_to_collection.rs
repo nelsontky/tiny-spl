@@ -1,10 +1,8 @@
 use anchor_lang::{prelude::*, solana_program};
 
-use crate::state::MintTinySplArgs;
-
 pub fn mint_tiny_spl_to_collection<'info>(
     ctx: &CpiContext<'_, '_, '_, 'info, MintTinySplToCollection<'info>>,
-    mint_tiny_spl_args: MintTinySplArgs,
+    metadata: mpl_bubblegum::types::MetadataArgs,
 ) -> Result<()> {
     let mut ix = mpl_bubblegum::instructions::MintToCollectionV1 {
         tree_config: *ctx.accounts.tree_config.key,
@@ -26,27 +24,7 @@ pub fn mint_tiny_spl_to_collection<'info>(
     }
     .instruction(
         mpl_bubblegum::instructions::MintToCollectionV1InstructionArgs {
-            metadata: mpl_bubblegum::types::MetadataArgs {
-                name: mint_tiny_spl_args.name.replace("\0", ""),
-                symbol: mint_tiny_spl_args.symbol.replace("\0", ""),
-                uri: mint_tiny_spl_args.uri.replace("\0", ""),
-                seller_fee_basis_points: 0,
-                primary_sale_happened: false,
-                is_mutable: true,
-                edition_nonce: None,
-                token_standard: Some(mpl_bubblegum::types::TokenStandard::NonFungible),
-                collection: Some(mpl_bubblegum::types::Collection {
-                    key: ctx.accounts.collection_mint.key(),
-                    verified: true,
-                }),
-                uses: None,
-                token_program_version: mpl_bubblegum::types::TokenProgramVersion::Original,
-                creators: vec![mpl_bubblegum::types::Creator {
-                    address: ctx.accounts.tiny_spl_authority.key(),
-                    verified: true,
-                    share: 100,
-                }],
-            },
+            metadata,
         },
     );
 
