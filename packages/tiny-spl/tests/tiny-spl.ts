@@ -348,7 +348,7 @@ describe("tiny-spl", () => {
     expect(totalNewAssetsAmount).to.equal(TOKENS_TO_MINT);
   });
 
-  it.only("should not allow token owner to combine the same token", async () => {
+  it("should not allow token owner to combine the same token", async () => {
     // upload metadata for the new token
     const assets = await CONNECTION.getAssetsByOwner({
       ownerAddress: SIGNER.publicKey.toBase58(),
@@ -432,5 +432,118 @@ describe("tiny-spl", () => {
 
     const errorCode = (result.value?.err as any).InstructionError[1].Custom;
     expect(errorCode).to.equal(6007);
+  });
+
+  it("should allow token owner to combine tokens", async () => {
+    // upload metadata for the new token
+    const assets = await CONNECTION.getAssetsByOwner({
+      ownerAddress: SIGNER.publicKey.toBase58(),
+      limit: 2,
+      sortBy: {
+        sortBy: "created",
+        sortDirection: "desc",
+      },
+    });
+
+    const [assetA, assetB] = assets.items;
+    const assetProofA = await CONNECTION.getAssetProof(
+      new PublicKey(assetA.id)
+    );
+    const assetProofB = await CONNECTION.getAssetProof(
+      new PublicKey(assetB.id)
+    );
+
+    const treeAccount = await ConcurrentMerkleTreeAccount.fromAccountAddress(
+      CONNECTION,
+      TREE_ID
+    );
+    const canopyDepth = treeAccount.getCanopyDepth();
+
+    // parse the list of proof addresses into a valid AccountMeta[]
+    const proofPathA: AccountMeta[] = assetProofA.proof
+      .map((node: string) => ({
+        pubkey: new PublicKey(node),
+        isSigner: false,
+        isWritable: false,
+      }))
+      .slice(0, assetProofA.proof.length - (!!canopyDepth ? canopyDepth : 0));
+
+    const proofPathB: AccountMeta[] = assetProofB.proof
+      .map((node: string) => ({
+        pubkey: new PublicKey(node),
+        isSigner: false,
+        isWritable: false,
+      }))
+      .slice(0, assetProofB.proof.length - (!!canopyDepth ? canopyDepth : 0));
+
+    const amountA = new URL(assetA.content.json_uri).searchParams.get("amount");
+    const amountB = new URL(assetB.content.json_uri).searchParams.get("amount");
+    const combineIx = await PROGRAM.methods
+      .combine(
+        [new BN(amountA), new BN(amountB)],
+        [new PublicKey(assetA.id), new PublicKey(assetB.id)],
+        [
+          [...new PublicKey(assetProofA.root.trim()).toBytes()],
+          [...new PublicKey(assetProofB.root.trim()).toBytes()],
+        ],
+        [
+          new anchor.BN(assetA.compression.leaf_id),
+          new anchor.BN(assetB.compression.leaf_id),
+        ],
+        [assetA.compression.leaf_id, assetB.compression.leaf_id],
+        [proofPathA.length, proofPathA.length + proofPathB.length]
+      )
+      .accounts({
+        authority: SIGNER.publicKey,
+        bubblegumSigner,
+        collectionMetadata: metadata,
+        collectionMint: mint,
+        compressionProgram: COMPRESSION_PROGRAM_ID,
+        editionAccount: masterEdition,
+        leafDelegate: SIGNER.publicKey,
+        leafOwner: SIGNER.publicKey,
+        logWrapper: SPL_NOOP_PROGRAM_ID,
+        merkleTree: TREE_ID,
+        mplBubblegumProgram: BUBBLEGUM_PROGRAM_ID,
+        newLeafOwner: SIGNER.publicKey,
+        systemProgram: anchor.web3.SystemProgram.programId,
+        tinySplAuthority,
+        tokenMetadataProgram: mplTokenMetadataProgramId,
+        treeAuthority,
+        treeCreatorOrDelegate: TREE_CREATOR.publicKey,
+      })
+      .remainingAccounts([...proofPathA, ...proofPathB])
+      .instruction();
+
+    const modifyComputeUnits = ComputeBudgetProgram.setComputeUnitLimit({
+      units: 1_400_000,
+    });
+
+    const result = await sendAndConfirmIxs(
+      [modifyComputeUnits, combineIx],
+      SIGNER.publicKey,
+      [SIGNER, TREE_CREATOR],
+      true
+    );
+
+    expect(result.value.err).to.be.null;
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    const newestAsset = (
+      await CONNECTION.getAssetsByOwner({
+        ownerAddress: SIGNER.publicKey.toBase58(),
+        limit: 1,
+        sortBy: {
+          sortBy: "created",
+          sortDirection: "desc",
+        },
+      })
+    ).items[0];
+    const amount = new URL(newestAsset.content.json_uri).searchParams.get(
+      "amount"
+    );
+
+    expect(parseInt(amount)).to.equal(parseInt(amountA) + parseInt(amountB));
   });
 });
