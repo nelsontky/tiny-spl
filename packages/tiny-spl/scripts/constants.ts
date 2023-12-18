@@ -46,13 +46,3 @@ export const RECEIVER_ID = new PublicKey(process.env.RECEIVER_ADDRESS!);
 export const METADATA_BUFFER_START =
   8 + // discriminator
   32; // authority
-
-export const SIGNER_OWNED_TOKEN_FOR_TESTING = new PublicKey(
-  process.env.SIGNER_OWNED_TOKEN_FOR_TESTING!
-);
-export const SIGNER_OWNED_SPOOFED_COLLECTION_TOKEN_FOR_TESTING = new PublicKey(
-  process.env.SIGNER_OWNED_SPOOFED_COLLECTION_TOKEN_FOR_TESTING!
-);
-export const SIGNER_OWNED_INVALID_TOKEN_FOR_TESTING = new PublicKey(
-  process.env.SIGNER_OWNED_INVALID_TOKEN_FOR_TESTING!
-);
