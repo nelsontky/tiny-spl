@@ -1,4 +1,5 @@
 import {
+  ComputeBudgetProgram,
   Keypair,
   PublicKey,
   TransactionInstruction,
@@ -13,6 +14,10 @@ export const sendAndConfirmIxs = async (
   signers: Keypair[],
   skipPreflight = false
 ) => {
+  const setComputeUnitPriceIx = ComputeBudgetProgram.setComputeUnitPrice({
+    microLamports: 40_000,
+  });
+
   try {
     const { blockhash, lastValidBlockHeight } =
       await CONNECTION.getLatestBlockhash();
@@ -20,7 +25,7 @@ export const sendAndConfirmIxs = async (
     const messageV0 = new TransactionMessage({
       payerKey,
       recentBlockhash: blockhash,
-      instructions: ixs,
+      instructions: [setComputeUnitPriceIx, ...ixs],
     }).compileToV0Message();
     const transaction = new VersionedTransaction(messageV0);
 

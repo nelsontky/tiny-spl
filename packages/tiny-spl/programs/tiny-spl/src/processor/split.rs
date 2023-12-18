@@ -21,6 +21,8 @@ pub fn split<'info>(
     index: u32,
     destination_amounts: Vec<u64>,
 ) -> Result<()> {
+    verify_token_splits(source_amount, &destination_amounts)?;
+
     let collection_metadata = mpl_token_metadata::accounts::Metadata::safe_deserialize(
         ctx.accounts
             .collection_metadata
@@ -52,8 +54,6 @@ pub fn split<'info>(
         calculated_asset_id == asset_id,
         TinySplError::AssetIdMismatch
     );
-
-    verify_token_splits(source_amount, &destination_amounts)?;
 
     let burn_cpi_context = CpiContext::new(
         ctx.accounts.mpl_bubblegum_program.to_account_info(),
