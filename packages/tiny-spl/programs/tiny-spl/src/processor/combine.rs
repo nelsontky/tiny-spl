@@ -139,11 +139,16 @@ pub fn combine<'info>(
         &tiny_spl_seeds,
     );
 
+    let mut total_amount: u64 = 0;
+    for amount in amounts.iter() {
+        total_amount = total_amount.checked_add(*amount).unwrap();
+    }
+
     mint_tiny_spl_to_collection(
         &mint_cpi_context,
         get_tiny_spl_metadata(
             collection_metadata.symbol,
-            amounts.into_iter().sum(),
+            total_amount,
             ctx.accounts.collection_mint.key(),
             ctx.accounts.tiny_spl_authority.key(),
         ),
