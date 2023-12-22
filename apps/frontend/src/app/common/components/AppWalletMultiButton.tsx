@@ -5,6 +5,7 @@ import { BaseWalletConnectionButton } from "./AppBaseWalletConnectionButton";
 import { AppWalletButtonProps } from "./AppWalletButton";
 import { MenuList, MenuListItem } from "react95";
 import clsx from "clsx";
+import { truncatePublicKey } from "../utils/truncatePublicKey";
 
 const LABELS = {
   "change-wallet": "Change wallet",
@@ -18,7 +19,7 @@ const LABELS = {
 
 type Props = AppWalletButtonProps;
 
-export function AppWalletMultiButton(props: Props) {
+export function AppWalletMultiButton({ children, ...props }: Props) {
   const { setVisible: setModalVisible } = useWalletModal();
   const {
     buttonState,
@@ -55,15 +56,18 @@ export function AppWalletMultiButton(props: Props) {
   }, []);
 
   const content = useMemo(() => {
-    if (publicKey) {
+    if (children) {
+      return children;
+    } else if (publicKey) {
       const base58 = publicKey.toBase58();
-      return base58.slice(0, 4) + ".." + base58.slice(-4);
+      return truncatePublicKey(base58);
     } else if (buttonState === "connecting" || buttonState === "has-wallet") {
       return LABELS[buttonState];
     } else {
       return LABELS["no-wallet"];
     }
   }, [buttonState, LABELS, publicKey]);
+
   return (
     <div className="relative">
       <BaseWalletConnectionButton
@@ -92,10 +96,7 @@ export function AppWalletMultiButton(props: Props) {
       </BaseWalletConnectionButton>
       <MenuList
         ref={ref}
-        className={clsx(
-          "!absolute left-0 top-full",
-          !menuOpen && "!hidden"
-        )}
+        className={clsx("!absolute left-0 top-full", !menuOpen && "!hidden")}
       >
         {publicKey ? (
           <MenuListItem

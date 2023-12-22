@@ -29,7 +29,6 @@ export const AppWalletButton: FC<AppWalletButtonProps> = (props) => {
       onClick={props.onClick}
       tabIndex={props.tabIndex || 0}
       type="button"
-      primary
     >
       {props.startIcon && (
         <i className="wallet-adapter-button-start-icon">{props.startIcon}</i>

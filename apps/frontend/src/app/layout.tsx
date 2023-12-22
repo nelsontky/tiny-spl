@@ -5,6 +5,7 @@ import clsx from "clsx";
 import "./globals.css";
 
 import { SolanaProviders } from "./common/providers/SolanaProviders";
+import { AppProviders } from "./common/providers/AppProviders";
 
 export const metadata: Metadata = {
   title: "Tiny SPL",
@@ -34,9 +35,7 @@ export default function RootLayout({
   return (
     <html className={clsx(msSansSerif.className, "bg-[#008080] h-full")}>
       <body className="h-full">
-        <SolanaProviders>
-          <StyledComponentsRegistry>{children}</StyledComponentsRegistry>
-        </SolanaProviders>
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   );

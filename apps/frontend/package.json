@@ -17,6 +17,7 @@
     "next": "14.0.4",
     "react": "^18",
     "react-dom": "^18",
+    "react-router-dom": "^6.21.1",
     "react95": "^4.0.0",
     "styled-components": "^6.1.2"
   },
