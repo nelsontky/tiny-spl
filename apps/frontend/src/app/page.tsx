@@ -1,7 +1,8 @@
 "use client";
 
-import { AppBar } from "./common/components/AppBar";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+
+import { AppBar } from "./common/components/AppBar";
 import { AppContainer } from "./common/components/AppContainer";
 import { MainPage } from "./features/homepage/components/MainPage";
 import { WalletPage } from "./features/wallet/components/WalletPage";

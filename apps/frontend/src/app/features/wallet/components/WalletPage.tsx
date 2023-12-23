@@ -1,16 +1,17 @@
-import { Loader } from "@/app/common/components/Loader";
-import { truncatePublicKey } from "@/app/common/utils/truncatePublicKey";
 import { useParams } from "react-router-dom";
 import {
-  WindowHeader,
-  Window,
   Table,
   TableBody,
   TableHead,
   TableHeadCell,
   TableRow,
+  Window,
   WindowContent,
+  WindowHeader,
 } from "react95";
+
+import { Loader } from "@/app/common/components/Loader";
+import { truncatePublicKey } from "@/app/common/utils/truncatePublicKey";
 
 export const WalletPage = () => {
   const { publicKey } = useParams<{ publicKey: string }>();

@@ -1,6 +1,10 @@
 /** @type {import("eslint").Linter.Config} */
 module.exports = {
-  plugins: ["simple-import-sort"],
+  parserOptions: {
+    sourceType: "module",
+  },
+  env: { es6: true },
+  plugins: ["simple-import-sort", "import"],
   rules: {
     "simple-import-sort/imports": "error",
     "simple-import-sort/exports": "error",

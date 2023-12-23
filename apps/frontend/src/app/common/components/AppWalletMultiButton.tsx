@@ -1,11 +1,12 @@
 import { useWalletMultiButton } from "@solana/wallet-adapter-base-ui";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import clsx from "clsx";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { MenuList, MenuListItem } from "react95";
+
+import { truncatePublicKey } from "../utils/truncatePublicKey";
 import { BaseWalletConnectionButton } from "./AppBaseWalletConnectionButton";
 import { AppWalletButtonProps } from "./AppWalletButton";
-import { MenuList, MenuListItem } from "react95";
-import clsx from "clsx";
-import { truncatePublicKey } from "../utils/truncatePublicKey";
 
 const LABELS = {
   "change-wallet": "Change wallet",

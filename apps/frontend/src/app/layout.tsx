@@ -1,11 +1,12 @@
-import localFont from "next/font/local";
-import StyledComponentsRegistry from "./common/providers/StyledComponentsRegistry";
-import { Metadata } from "next";
-import clsx from "clsx";
 import "./globals.css";
 
-import { SolanaProviders } from "./common/providers/SolanaProviders";
+import clsx from "clsx";
+import { Metadata } from "next";
+import localFont from "next/font/local";
+
 import { AppProviders } from "./common/providers/AppProviders";
+import { SolanaProviders } from "./common/providers/SolanaProviders";
+import StyledComponentsRegistry from "./common/providers/StyledComponentsRegistry";
 
 export const metadata: Metadata = {
   title: "Tiny SPL",
