@@ -1,30 +1,28 @@
+import type {
+  Metadata,
+  Mint,
+  NftOriginalEdition,
+  Option,
+  SplTokenCurrency,
+} from "@metaplex-foundation/js";
+// import from the `@metaplex-foundation/js`
+import {
+  amount,
+  MetaplexError,
+  Pda,
+  toBigNumber,
+} from "@metaplex-foundation/js";
+import { PROGRAM_ID as BUBBLEGUM_PROGRAM_ID } from "@metaplex-foundation/mpl-bubblegum";
+import { TokenStandard } from "@metaplex-foundation/mpl-token-metadata";
+import { ConcurrentMerkleTreeAccount } from "@solana/spl-account-compression";
 import {
   Commitment,
   Connection,
   ConnectionConfig,
   PublicKey,
 } from "@solana/web3.js";
-import BN from "bn.js";
 import axios from "axios";
-
-import { TokenStandard } from "@metaplex-foundation/mpl-token-metadata";
-import { PROGRAM_ID as BUBBLEGUM_PROGRAM_ID } from "@metaplex-foundation/mpl-bubblegum";
-
-// import from the `@metaplex-foundation/js`
-import {
-  MetaplexError,
-  toBigNumber,
-  Pda,
-  amount,
-} from "@metaplex-foundation/js";
-import type {
-  SplTokenCurrency,
-  Metadata,
-  Mint,
-  NftOriginalEdition,
-  Option,
-} from "@metaplex-foundation/js";
-import { ConcurrentMerkleTreeAccount } from "@solana/spl-account-compression";
+import BN from "bn.js";
 
 export type JsonRpcParams<ReadApiMethodParams> = {
   method: string;
