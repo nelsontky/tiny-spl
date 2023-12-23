@@ -6,10 +6,12 @@ import {
   WalletProvider,
 } from "@solana/wallet-adapter-react";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
+import { type ConnectionConfig } from "@solana/web3.js";
 
 import "@solana/wallet-adapter-react-ui/styles.css";
 
-const wallets: Adapter[] = [];
+const WALLETS: Adapter[] = [];
+const CONNECTION_CONFIG: ConnectionConfig = { commitment: "confirmed" };
 
 export const SolanaProviders = ({
   children,
@@ -17,8 +19,11 @@ export const SolanaProviders = ({
   children: React.ReactNode;
 }) => {
   return (
-    <ConnectionProvider endpoint={process.env.NEXT_PUBLIC_SOLANA_RPC_URL!}>
-      <WalletProvider wallets={wallets} autoConnect>
+    <ConnectionProvider
+      endpoint={process.env.NEXT_PUBLIC_SOLANA_RPC_URL!}
+      config={CONNECTION_CONFIG}
+    >
+      <WalletProvider wallets={WALLETS} autoConnect>
         <WalletModalProvider>{children}</WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>

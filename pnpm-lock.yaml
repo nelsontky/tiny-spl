@@ -23,6 +23,18 @@ importers:
 
   apps/frontend:
     dependencies:
+      '@metaplex-foundation/js':
+        specifier: ^0.19.4
+        version: 0.19.5
+      '@metaplex-foundation/mpl-bubblegum':
+        specifier: ^0.7.0
+        version: 0.7.0
+      '@metaplex-foundation/mpl-token-metadata':
+        specifier: ^2.12.0
+        version: 2.13.0
+      '@solana/spl-account-compression':
+        specifier: ^0.2.0
+        version: 0.2.0(@solana/web3.js@1.87.6)
       '@solana/wallet-adapter-base':
         specifier: ^0.9.23
         version: 0.9.23(@solana/web3.js@1.87.6)
@@ -35,6 +47,12 @@ importers:
       '@solana/wallet-adapter-react-ui':
         specifier: ^0.9.34
         version: 0.9.34(@solana/web3.js@1.87.6)(bs58@4.0.1)(react-dom@18.2.0)(react-native@0.73.1)(react@18.2.0)
+      axios:
+        specifier: ^1.6.2
+        version: 1.6.2
+      bn.js:
+        specifier: ^5.2.1
+        version: 5.2.1
       clsx:
         specifier: ^2.0.0
         version: 2.0.0
@@ -56,7 +74,13 @@ importers:
       styled-components:
         specifier: ^6.1.2
         version: 6.1.2(react-dom@18.2.0)(react@18.2.0)
+      swr:
+        specifier: ^2.2.4
+        version: 2.2.4(react@18.2.0)
     devDependencies:
+      '@types/bn.js':
+        specifier: ^5.1.0
+        version: 5.1.5
       '@types/node':
         specifier: ^20
         version: 20.10.5
@@ -2750,6 +2774,24 @@ packages:
       '@solana/spl-token': 0.1.8
       '@solana/web3.js': 1.87.6
       bn.js: 5.2.1
+      js-sha3: 0.8.0
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - supports-color
+      - utf-8-validate
+    dev: false
+
+  /@metaplex-foundation/mpl-bubblegum@0.7.0:
+    resolution: {integrity: sha512-HCo6q+nh8M3KRv9/aUaZcJo5/vPJEeZwPGRDWkqN7lUXoMIvhd83fZi7MB1rIg1gwpVHfHqim0A02LCYKisWFg==}
+    dependencies:
+      '@metaplex-foundation/beet': 0.7.1
+      '@metaplex-foundation/beet-solana': 0.4.0
+      '@metaplex-foundation/cusper': 0.0.2
+      '@metaplex-foundation/mpl-token-metadata': 2.13.0
+      '@solana/spl-account-compression': 0.1.10(@solana/web3.js@1.87.6)
+      '@solana/spl-token': 0.1.8
+      '@solana/web3.js': 1.87.6
       js-sha3: 0.8.0
     transitivePeerDependencies:
       - bufferutil
@@ -11645,6 +11687,16 @@ packages:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
 
+  /swr@2.2.4(react@18.2.0):
+    resolution: {integrity: sha512-njiZ/4RiIhoOlAaLYDqwz5qH/KZXVilRLvomrx83HjzCWTfa+InyfAjv05PSFxnmLzZkNO9ZfvgoqzAaEI4sGQ==}
+    peerDependencies:
+      react: ^16.11.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      client-only: 0.0.1
+      react: 18.2.0
+      use-sync-external-store: 1.2.0(react@18.2.0)
+    dev: false
+
   /synckit@0.8.5:
     resolution: {integrity: sha512-L1dapNV6vu2s/4Sputv8xGsCdAVlb5nRDMFU/E27D44l5U6cw1g0dGd45uLc+OXjNMmF4ntiMdCimzcjFKQI8Q==}
     engines: {node: ^14.18.0 || >=16.0.0}
@@ -12203,6 +12255,14 @@ packages:
     dependencies:
       punycode: 2.3.0
     dev: true
+
+  /use-sync-external-store@1.2.0(react@18.2.0):
+    resolution: {integrity: sha512-eEgnFxGQ1Ife9bzYs6VLi8/4X6CObHMw9Qr9tPY43iKwsPw8xE8+EFsf/2cFZ5S3esXgpWgtSCtLNS41F+sKPA==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      react: 18.2.0
+    dev: false
 
   /utf-8-validate@5.0.10:
     resolution: {integrity: sha512-Z6czzLq4u8fPOyx7TU6X3dvUZVvoJmxSQ+IcrlmagKhilxlhZgxPK6C5Jqbkw1IDUmFTM+cz9QDnnLTwDz/2gQ==}
