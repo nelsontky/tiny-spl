@@ -12,9 +12,13 @@ import {
 
 import { Loader } from "@/app/common/components/Loader";
 import { truncatePublicKey } from "@/app/common/utils/truncatePublicKey";
+import { useTinySplsByOwner } from "../../swr-hooks/hooks/useTinySplsByOwner";
 
 export const WalletPage = () => {
   const { publicKey } = useParams<{ publicKey: string }>();
+
+  const { data } = useTinySplsByOwner(publicKey);
+  console.log(data);
 
   if (typeof publicKey !== "string") {
     // TODO: check if the public key is valid
