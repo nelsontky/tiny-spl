@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 import { ProgressBar } from "react95";
 
 export const Loader = () => {
@@ -9,9 +9,6 @@ export const Loader = () => {
   useEffect(() => {
     const timer = setInterval(() => {
       setPercent((previousPercent) => {
-        if (previousPercent === 100) {
-          return 0;
-        }
         const diff = Math.random() * 10;
         return Math.min(previousPercent + diff, 95);
       });
