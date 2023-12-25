@@ -17,6 +17,7 @@ export const filterTinySpls = async (
         .filter((item) => item !== null) as string[]
     )
   );
+
   const tinySplAuthorityAddresses = collectionIds.map((collectionId) => {
     const [tinySplAuthority] = PublicKey.findProgramAddressSync(
       [

@@ -1,4 +1,3 @@
-import { useSWRWithAxiosProgress } from "@/app/common/hooks/useSWRWithAxiosProgress";
 import { useWrapperConnection } from "@/app/common/hooks/useWrapperConnection";
 import {
   GetAssetsByOwnerRpcInput,
@@ -16,16 +15,12 @@ const useAssetsByOwner = (
 ) => {
   const wrapperConnection = useWrapperConnection();
 
-  const swr = useSWRWithAxiosProgress(
+  const swr = useSWR(
     !getAssetsByOwnerRpcInput
       ? null
       : ["getAssetsByOwner", getAssetsByOwnerRpcInput],
-    (onUploadProgress, onDownloadProgress) =>
-      ([_, getAssetsByOwnerRpcInput]) =>
-        wrapperConnection.getAssetsByOwner(getAssetsByOwnerRpcInput, {
-          onDownloadProgress,
-          onUploadProgress,
-        })
+    ([_, getAssetsByOwnerRpcInput]) =>
+      wrapperConnection.getAssetsByOwner(getAssetsByOwnerRpcInput)
   );
 
   return swr;
@@ -42,15 +37,13 @@ export const useTinySplsByOwner = (walletAddress: string | undefined) => {
     [walletAddress]
   );
 
-  const {
-    data: assetsByOwner,
-    progress: assetsByOwnerProgress,
-    mutate: mutateAssetsByOwner,
-  } = useAssetsByOwner(getAssetsByOwnerRpcInput);
+  const { data: assetsByOwner, mutate: mutateAssetsByOwner } = useAssetsByOwner(
+    getAssetsByOwnerRpcInput
+  );
 
   const { connection } = useConnection();
 
-  const { data, mutate: mutateTinySpls } = useSWR(
+  const { mutate: mutateTinySpls, ...rest } = useSWR(
     !assetsByOwner ? null : ["getTinySplsByOwner", assetsByOwner],
     async ([_, assetsByOwner]) => {
       const tinySpls = await filterTinySpls(assetsByOwner.items, connection);
@@ -101,6 +94,10 @@ export const useTinySplsByOwner = (walletAddress: string | undefined) => {
         };
       });
 
+      tinySplRows.sort((a, b) =>
+        new Decimal(b.amount).cmp(new Decimal(a.amount))
+      );
+
       return tinySplRows;
     }
   );
@@ -110,11 +107,5 @@ export const useTinySplsByOwner = (walletAddress: string | undefined) => {
     await mutateTinySpls();
   }, [mutateAssetsByOwner, mutateTinySpls]);
 
-  const progress = !data ? assetsByOwnerProgress * 0.75 : 100;
-
-  return {
-    data,
-    progress,
-    mutate,
-  };
+  return Object.assign(rest, { mutate });
 };

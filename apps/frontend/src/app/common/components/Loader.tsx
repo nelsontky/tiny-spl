@@ -13,9 +13,9 @@ export const Loader = () => {
           return 0;
         }
         const diff = Math.random() * 10;
-        return Math.min(previousPercent + diff, 100);
+        return Math.min(previousPercent + diff, 95);
       });
-    }, 500);
+    }, 125);
 
     return () => {
       clearInterval(timer);
