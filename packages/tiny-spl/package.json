@@ -1,6 +1,7 @@
 {
   "name": "@tiny-spl/contracts",
   "version": "0.0.0",
+  "main": "index.ts",
   "scripts": {
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
     "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
