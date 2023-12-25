@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import {
   ColumnDef,
   SortingState,
@@ -21,7 +21,7 @@ import {
 } from "react95";
 import { truncatePublicKey } from "@/app/common/utils/truncatePublicKey";
 import { useTinySplsByOwner } from "../../swr-hooks/hooks/useTinySplsByOwner";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Loader } from "@/app/common/components/Loader";
 import Decimal from "decimal.js";
 import { ChevronLeft } from "@/app/common/icons/ChevronLeft";
@@ -59,6 +59,9 @@ const columns: ColumnDef<TinySplRow>[] = [
                 className="!text-sm"
                 href={`https://xray.helius.xyz/token/${collectionId}?network=mainnet`}
                 target="_blank"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
               >
                 {truncatePublicKey(collectionId, 8)}
               </Anchor>
@@ -97,9 +100,7 @@ const columns: ColumnDef<TinySplRow>[] = [
 
 export const TinySplList = () => {
   const { publicKey } = useParams<{ publicKey: string }>();
-
   const { data } = useTinySplsByOwner(publicKey);
-
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
@@ -152,6 +153,17 @@ export const TinySplList = () => {
     );
   }
 
+  if (data.length === 0) {
+    return (
+      <>
+        <Table>{tableHead}</Table>
+        <WindowContent className="text-center">
+          No Tiny SPLs found in this wallet!
+        </WindowContent>
+      </>
+    );
+  }
+
   return (
     <Table>
       {tableHead}
@@ -165,10 +177,14 @@ export const TinySplList = () => {
                 {row.getVisibleCells().map((cell) => {
                   return (
                     <TableDataCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
+                      <Link
+                        to={`/${publicKey}?mint=${row.original.collectionId}`}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </Link>
                     </TableDataCell>
                   );
                 })}
