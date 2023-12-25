@@ -13,7 +13,7 @@ export const WalletPage = () => {
   }
 
   return (
-    <div className="h-full pt-16">
+    <div className="py-12">
       <Window className="w-full">
         <WindowHeader>{truncatePublicKey(publicKey)}'s Tiny SPLs</WindowHeader>
         <TinySplList />

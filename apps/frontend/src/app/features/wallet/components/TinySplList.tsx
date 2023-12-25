@@ -11,6 +11,7 @@ import { TinySplRow } from "../../swr-hooks/types/TinySplRow";
 import {
   Anchor,
   Avatar,
+  ScrollView,
   Table,
   TableBody,
   TableDataCell,
@@ -168,29 +169,26 @@ export const TinySplList = () => {
     <Table>
       {tableHead}
       <TableBody>
-        {table
-          .getRowModel()
-          .rows.slice(0, 10)
-          .map((row) => {
-            return (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => {
-                  return (
-                    <TableDataCell key={cell.id}>
-                      <Link
-                        to={`/${publicKey}?mint=${row.original.collectionId}`}
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </Link>
-                    </TableDataCell>
-                  );
-                })}
-              </TableRow>
-            );
-          })}
+        {table.getRowModel().rows.map((row) => {
+          return (
+            <TableRow key={row.id}>
+              {row.getVisibleCells().map((cell) => {
+                return (
+                  <TableDataCell key={cell.id}>
+                    <Link
+                      to={`/${publicKey}?mint=${row.original.collectionId}`}
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </Link>
+                  </TableDataCell>
+                );
+              })}
+            </TableRow>
+          );
+        })}
       </TableBody>
     </Table>
   );
