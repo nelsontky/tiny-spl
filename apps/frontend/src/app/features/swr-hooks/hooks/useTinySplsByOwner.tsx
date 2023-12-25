@@ -5,31 +5,43 @@ import {
   ReadApiAsset,
 } from "@/app/common/utils/WrapperConnection";
 import { useConnection } from "@solana/wallet-adapter-react";
-import { PublicKey } from "@solana/web3.js";
-import { PROGRAM_ID, TINY_SPL_AUTHORITY_SEED } from "@tiny-spl/contracts";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import useSWR from "swr";
+import { filterTinySpls } from "../utils/filterTinySpls";
+import { TinySplRow } from "../types/TinySplRow";
+import Decimal from "decimal.js";
 
 const useAssetsByOwner = (
-  getAssetsByOwnerRpcInput: GetAssetsByOwnerRpcInput
+  getAssetsByOwnerRpcInput: GetAssetsByOwnerRpcInput | undefined
 ) => {
   const wrapperConnection = useWrapperConnection();
 
   const swr = useSWRWithAxiosProgress(
-    "getAssetsByOwner",
-    (onUploadProgress, onDownloadProgress) => () =>
-      wrapperConnection.getAssetsByOwner(getAssetsByOwnerRpcInput, {
-        onDownloadProgress,
-        onUploadProgress,
-      })
+    !getAssetsByOwnerRpcInput
+      ? null
+      : ["getAssetsByOwner", getAssetsByOwnerRpcInput],
+    (onUploadProgress, onDownloadProgress) =>
+      ([_, getAssetsByOwnerRpcInput]) =>
+        wrapperConnection.getAssetsByOwner(getAssetsByOwnerRpcInput, {
+          onDownloadProgress,
+          onUploadProgress,
+        })
   );
 
   return swr;
 };
 
-export const useTinySplsByOwner = (
-  getAssetsByOwnerRpcInput: GetAssetsByOwnerRpcInput
-) => {
+export const useTinySplsByOwner = (walletAddress: string | undefined) => {
+  const getAssetsByOwnerRpcInput = useMemo(
+    () =>
+      !walletAddress
+        ? undefined
+        : {
+            ownerAddress: walletAddress,
+          },
+    [walletAddress]
+  );
+
   const {
     data: assetsByOwner,
     progress: assetsByOwnerProgress,
@@ -41,42 +53,55 @@ export const useTinySplsByOwner = (
   const { data, mutate: mutateTinySpls } = useSWR(
     !assetsByOwner ? null : ["getTinySplsByOwner", assetsByOwner],
     async ([_, assetsByOwner]) => {
-      const tinySplAuthorityAddresses = assetsByOwner.items.map((item) => {
-        const itemId = item.id;
-        const [tinySplAuthority] = PublicKey.findProgramAddressSync(
-          [
-            Buffer.from(TINY_SPL_AUTHORITY_SEED),
-            new PublicKey(itemId).toBuffer(),
-          ],
-          PROGRAM_ID
-        );
-        return { itemId, tinySplAuthority };
+      const tinySpls = await filterTinySpls(assetsByOwner.items, connection);
+
+      const groupedByCollectionId: Record<string, ReadApiAsset[]> = {};
+      for (const tinySpl of tinySpls) {
+        const collectionId = tinySpl.grouping.find(
+          (grouping) => grouping.group_key === "collection"
+        )?.group_value;
+
+        if (!collectionId) {
+          continue;
+        }
+
+        if (!groupedByCollectionId[collectionId]) {
+          groupedByCollectionId[collectionId] = [];
+        }
+
+        groupedByCollectionId[collectionId]?.push(tinySpl);
+      }
+
+      const tinySplRows: TinySplRow[] = Object.entries(
+        groupedByCollectionId
+      ).map(([collectionId, items]) => {
+        const collectionName = items?.[0]?.content.metadata?.attributes?.find(
+          (attribute) => attribute.trait_type === "Token name"
+        )?.value;
+        const symbol = items?.[0]?.content.metadata?.symbol;
+        const logo = items?.[0]?.content?.links?.image;
+        const amount = items.reduce((acc, item) => {
+          const currentAmount = item.content.metadata?.attributes?.find(
+            (attribute) => attribute.trait_type === "Amount"
+          )?.value;
+
+          if (!currentAmount) {
+            return acc;
+          }
+
+          return acc.add(new Decimal(currentAmount));
+        }, new Decimal(0));
+
+        return {
+          collectionId,
+          collectionName,
+          symbol,
+          logo,
+          amount: amount.toFixed(),
+        };
       });
 
-      const accountInfos = await connection.getMultipleAccountsInfo(
-        tinySplAuthorityAddresses.map(
-          ({ tinySplAuthority }) => tinySplAuthority
-        )
-      );
-
-      if (!accountInfos) {
-        return [];
-      }
-
-      const tinySpls: ReadApiAsset[] = [];
-      for (let i = 0; i < accountInfos.length; i++) {
-        const accountInfo = accountInfos[i];
-        if (accountInfo) {
-          const item = assetsByOwner.items.find(
-            (item) => item.id === tinySplAuthorityAddresses[i]?.itemId
-          );
-          if (item) {
-            tinySpls.push(item);
-          }
-        }
-      }
-
-      return tinySpls;
+      return tinySplRows;
     }
   );
 

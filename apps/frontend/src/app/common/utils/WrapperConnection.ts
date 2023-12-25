@@ -324,6 +324,9 @@ export type ReadApiParamAssetSortBy = {
 export type ReadApiAssetContent = {
   json_uri: string;
   metadata: Metadata["json"];
+  links?: {
+    image?: string;
+  };
 };
 
 export type ReadApiCompressionMetadata = {
