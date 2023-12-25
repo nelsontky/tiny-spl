@@ -14,7 +14,7 @@ export const filterTinySpls = async (
             asset.grouping.find((group) => group.group_key === "collection")
               ?.group_value
         )
-        .filter((item) => item !== null) as string[]
+        .filter(Boolean) as string[]
     )
   );
 

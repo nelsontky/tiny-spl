@@ -82,7 +82,7 @@ export const useTinySplsByOwner = (walletAddress: string | undefined) => {
             return acc;
           }
 
-          return acc.add(new Decimal(currentAmount));
+          return acc.add(new Decimal(currentAmount.replaceAll(",", "")));
         }, new Decimal(0));
 
         return {
