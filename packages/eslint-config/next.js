@@ -19,7 +19,7 @@ module.exports = {
     node: true,
     browser: true,
   },
-  plugins: ["only-warn"],
+  plugins: ["only-warn", "react-hooks"],
   settings: {
     "import/resolver": {
       typescript: {
@@ -37,5 +37,7 @@ module.exports = {
     "@next/next/no-img-element": "off",
     "turbo/no-undeclared-env-vars": "off",
     "no-unused-vars": "off",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "error",
   },
 };

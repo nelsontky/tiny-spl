@@ -2,10 +2,11 @@ import {
   Commitment,
   Connection,
   ConnectionConfig,
+  GetMultipleAccountsConfig,
   PublicKey,
 } from "@solana/web3.js";
 import BN from "bn.js";
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 
 import { TokenStandard } from "@metaplex-foundation/mpl-token-metadata";
 import { PROGRAM_ID as BUBBLEGUM_PROGRAM_ID } from "@metaplex-foundation/mpl-bubblegum";

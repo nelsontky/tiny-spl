@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@coral-xyz/anchor": "^0.29.0",
     "@metaplex-foundation/js": "^0.19.4",
     "@metaplex-foundation/mpl-bubblegum": "^0.7.0",
     "@metaplex-foundation/mpl-token-metadata": "^2.12.0",
@@ -26,7 +27,8 @@
     "react-router-dom": "^6.21.1",
     "react95": "^4.0.0",
     "styled-components": "^6.1.2",
-    "swr": "^2.2.4"
+    "swr": "^2.2.4",
+    "@tiny-spl/contracts": "workspace:*"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^14.0.2",

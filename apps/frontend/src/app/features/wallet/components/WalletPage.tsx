@@ -28,7 +28,7 @@ export const WalletPage = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableHeadCell>Icon</TableHeadCell>
+              <TableHeadCell disabled>Icon</TableHeadCell>
               <TableHeadCell>Name</TableHeadCell>
               <TableHeadCell>Amount</TableHeadCell>
             </TableRow>

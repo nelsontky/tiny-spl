@@ -21,7 +21,7 @@ import {
   ConnectionConfig,
   PublicKey,
 } from "@solana/web3.js";
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 import BN from "bn.js";
 
 export type JsonRpcParams<ReadApiMethodParams> = {
@@ -151,14 +151,19 @@ export class WrapperConnection extends Connection {
   }
 
   private callReadApi = async <ReadApiMethodParams, ReadApiJsonOutput>(
-    jsonRpcParams: JsonRpcParams<ReadApiMethodParams>
+    jsonRpcParams: JsonRpcParams<ReadApiMethodParams>,
+    axiosRequestConfig?: AxiosRequestConfig
   ): Promise<JsonRpcOutput<ReadApiJsonOutput>> => {
-    const response = await axios.post(this.rpcEndpoint, {
-      jsonrpc: "2.0",
-      method: jsonRpcParams.method,
-      id: jsonRpcParams.id ?? "rpd-op-123",
-      params: jsonRpcParams.params,
-    });
+    const response = await axios.post(
+      this.rpcEndpoint,
+      {
+        jsonrpc: "2.0",
+        method: jsonRpcParams.method,
+        id: jsonRpcParams.id ?? "rpd-op-123",
+        params: jsonRpcParams.params,
+      },
+      axiosRequestConfig
+    );
 
     return response.data;
   };
@@ -239,14 +244,18 @@ export class WrapperConnection extends Connection {
   }
 
   //
-  async getAssetsByOwner({
-    ownerAddress,
-    page,
-    limit,
-    sortBy,
-    before,
-    after,
-  }: GetAssetsByOwnerRpcInput): Promise<ReadApiAssetList> {
+  //
+  async getAssetsByOwner(
+    {
+      ownerAddress,
+      page,
+      limit,
+      sortBy,
+      before,
+      after,
+    }: GetAssetsByOwnerRpcInput,
+    axiosRequestConfig?: AxiosRequestConfig
+  ): Promise<ReadApiAssetList> {
     // `page` cannot be supplied with `before` or `after`
     if (typeof page == "number" && (before || after))
       throw new ReadApiError(
@@ -258,17 +267,20 @@ export class WrapperConnection extends Connection {
     const { result } = await this.callReadApi<
       GetAssetsByOwnerRpcInput,
       ReadApiAssetList
-    >({
-      method: "getAssetsByOwner",
-      params: {
-        ownerAddress,
-        after: after ?? null,
-        before: before ?? null,
-        limit: limit ?? null,
-        page: page ?? 1,
-        sortBy: sortBy ?? null,
+    >(
+      {
+        method: "getAssetsByOwner",
+        params: {
+          ownerAddress,
+          after: after ?? null,
+          before: before ?? null,
+          limit: limit ?? null,
+          page: page ?? 1,
+          sortBy: sortBy ?? null,
+        },
       },
-    });
+      axiosRequestConfig
+    );
 
     if (!result) throw new ReadApiError("No results returned");
 
