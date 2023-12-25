@@ -18,6 +18,7 @@
     "@solana/wallet-adapter-base-ui": "^0.1.2",
     "@solana/wallet-adapter-react": "^0.15.35",
     "@solana/wallet-adapter-react-ui": "^0.9.34",
+    "@tanstack/react-table": "^8.11.2",
     "@tiny-spl/contracts": "workspace:*",
     "axios": "^1.6.2",
     "bn.js": "^5.2.1",
