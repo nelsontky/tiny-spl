@@ -15,12 +15,12 @@ const StyledAppWalletMultiButton = styled(AppWalletMultiButton)``;
 export const AppBar = () => {
   return (
     <>
-      <React95AppBar className="h-12">
+      <React95AppBar className="h-12 z-10">
         <Toolbar>
           <StyledAppWalletMultiButton />
         </Toolbar>
       </React95AppBar>
-      <div className="h-12" />
+      <div className="min-h-[3rem]" />
     </>
   );
 };
