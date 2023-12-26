@@ -1,6 +1,7 @@
-import { ReadApiAsset } from "@/app/common/utils/WrapperConnection";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { PROGRAM_ID, TINY_SPL_AUTHORITY_SEED } from "@tiny-spl/contracts";
+
+import { ReadApiAsset } from "@/app/common/utils/WrapperConnection";
 
 export const filterTinySpls = async (
   assets: ReadApiAsset[],
@@ -9,6 +10,7 @@ export const filterTinySpls = async (
   const collectionIds = Array.from(
     new Set(
       assets
+        .filter((asset) => !asset.burnt)
         .map(
           (asset) =>
             asset.grouping.find((group) => group.group_key === "collection")
