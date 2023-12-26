@@ -1,5 +1,5 @@
-import { Window, WindowHeader } from "react95";
 import { useParams, useSearchParams } from "react-router-dom";
+import { Window, WindowHeader } from "react95";
 
 export const MintPage = () => {
   return (
