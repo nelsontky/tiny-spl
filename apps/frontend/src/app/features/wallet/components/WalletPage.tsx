@@ -1,9 +1,10 @@
-import { useParams, redirect, useSearchParams } from "react-router-dom";
+import { redirect, useParams, useSearchParams } from "react-router-dom";
 import { Window, WindowHeader } from "react95";
 
 import { truncatePublicKey } from "@/app/common/utils/truncatePublicKey";
-import { TinySplList } from "./TinySplList";
+
 import { MintPage } from "../../mint/components/MintPage";
+import { TinySplList } from "./TinySplList";
 
 export const WalletPage = () => {
   const { publicKey } = useParams<{ publicKey: string }>();

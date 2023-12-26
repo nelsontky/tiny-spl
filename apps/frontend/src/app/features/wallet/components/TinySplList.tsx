@@ -1,17 +1,17 @@
-import { Link, useParams } from "react-router-dom";
 import {
   ColumnDef,
-  SortingState,
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
+  SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { TinySplRow } from "../../swr-hooks/types/TinySplRow";
+import Decimal from "decimal.js";
+import { useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import {
   Anchor,
   Avatar,
-  ScrollView,
   Table,
   TableBody,
   TableDataCell,
@@ -20,12 +20,13 @@ import {
   TableRow,
   WindowContent,
 } from "react95";
-import { truncatePublicKey } from "@/app/common/utils/truncatePublicKey";
-import { useTinySplsByOwner } from "../../swr-hooks/hooks/useTinySplsByOwner";
-import { useState } from "react";
+
 import { Loader } from "@/app/common/components/Loader";
-import Decimal from "decimal.js";
 import { ChevronLeft } from "@/app/common/icons/ChevronLeft";
+import { truncatePublicKey } from "@/app/common/utils/truncatePublicKey";
+
+import { useTinySplsByOwner } from "../../swr-hooks/hooks/useTinySplsByOwner";
+import { TinySplRow } from "../../swr-hooks/types/TinySplRow";
 
 const columns: ColumnDef<TinySplRow>[] = [
   {
@@ -35,7 +36,7 @@ const columns: ColumnDef<TinySplRow>[] = [
         header: "Logo",
         accessorKey: "logo",
         cell: (info) => (
-          <div className="flex justify-center">
+          <div className="flex justify-center w-full">
             <Avatar square size={50} src={info.getValue()} />
           </div>
         ),
@@ -85,10 +86,13 @@ const columns: ColumnDef<TinySplRow>[] = [
         cell: (info) => {
           const amount = info.getValue();
           const symbol = info.row.original.symbol;
+          const formattedAmount = Intl.NumberFormat("en-US", {
+            currency: "USD",
+          }).format(amount);
 
           return (
             <div>
-              {amount} {symbol}
+              {formattedAmount} {symbol}
             </div>
           );
         },
@@ -166,7 +170,7 @@ export const TinySplList = () => {
   }
 
   return (
-    <Table>
+    <Table className="h-[1px]">
       {tableHead}
       <TableBody>
         {table.getRowModel().rows.map((row) => {
@@ -176,6 +180,7 @@ export const TinySplList = () => {
                 return (
                   <TableDataCell key={cell.id}>
                     <Link
+                      className="flex items-center w-full h-full"
                       to={`/${publicKey}?mint=${row.original.collectionId}`}
                     >
                       {flexRender(

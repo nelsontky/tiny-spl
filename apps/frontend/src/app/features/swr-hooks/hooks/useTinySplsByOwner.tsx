@@ -1,14 +1,17 @@
+import { useConnection } from "@solana/wallet-adapter-react";
+import Decimal from "decimal.js";
+import { useCallback, useMemo } from "react";
+import useSWR from "swr";
+
 import { useWrapperConnection } from "@/app/common/hooks/useWrapperConnection";
 import {
   GetAssetsByOwnerRpcInput,
   ReadApiAsset,
 } from "@/app/common/utils/WrapperConnection";
-import { useConnection } from "@solana/wallet-adapter-react";
-import { useCallback, useMemo } from "react";
-import useSWR from "swr";
-import { filterTinySpls } from "../utils/filterTinySpls";
+
 import { TinySplRow } from "../types/TinySplRow";
-import Decimal from "decimal.js";
+import { filterTinySpls } from "../utils/filterTinySpls";
+import { getAssetAmount } from "../utils/getAssetAmount";
 
 const useAssetsByOwner = (
   getAssetsByOwnerRpcInput: GetAssetsByOwnerRpcInput | undefined
@@ -74,15 +77,8 @@ export const useTinySplsByOwner = (walletAddress: string | undefined) => {
         const symbol = items?.[0]?.content.metadata?.symbol;
         const logo = items?.[0]?.content?.links?.image;
         const amount = items.reduce((acc, item) => {
-          const currentAmount = item.content.metadata?.attributes?.find(
-            (attribute) => attribute.trait_type === "Amount"
-          )?.value;
-
-          if (!currentAmount) {
-            return acc;
-          }
-
-          return acc.add(new Decimal(currentAmount.replaceAll(",", "")));
+          const currentAmount = getAssetAmount(item);
+          return acc.add(new Decimal(currentAmount));
         }, new Decimal(0));
 
         return {
@@ -91,6 +87,7 @@ export const useTinySplsByOwner = (walletAddress: string | undefined) => {
           symbol,
           logo,
           amount: amount.toFixed(),
+          assets: items,
         };
       });
 
