@@ -169,7 +169,7 @@ export type TinySpl = {
         {
           "name": "treeCreatorOrDelegate",
           "isMut": false,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "collectionMint",
@@ -240,7 +240,7 @@ export type TinySpl = {
         {
           "name": "treeCreatorOrDelegate",
           "isMut": false,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "leafOwner",
@@ -363,7 +363,7 @@ export type TinySpl = {
         {
           "name": "treeCreatorOrDelegate",
           "isMut": false,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "leafOwner",
@@ -764,7 +764,7 @@ export const IDL: TinySpl = {
         {
           "name": "treeCreatorOrDelegate",
           "isMut": false,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "collectionMint",
@@ -835,7 +835,7 @@ export const IDL: TinySpl = {
         {
           "name": "treeCreatorOrDelegate",
           "isMut": false,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "leafOwner",
@@ -958,7 +958,7 @@ export const IDL: TinySpl = {
         {
           "name": "treeCreatorOrDelegate",
           "isMut": false,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "leafOwner",

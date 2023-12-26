@@ -74,7 +74,8 @@ pub struct MintTo<'info> {
     /// CHECK: checked in cpi to account compression
     pub merkle_tree: UncheckedAccount<'info>,
     pub mint_authority: Signer<'info>,
-    pub tree_creator_or_delegate: Signer<'info>,
+    /// CHECK: This account is checked in CPI
+    pub tree_creator_or_delegate: UncheckedAccount<'info>,
     /// CHECK: checked in cpi to bubblegum
     pub collection_mint: UncheckedAccount<'info>,
     #[account(mut)]

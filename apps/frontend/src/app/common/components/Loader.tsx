@@ -3,8 +3,14 @@
 import { useEffect, useState } from "react";
 import { ProgressBar } from "react95";
 
-export const Loader = () => {
-  const [percent, setPercent] = useState(0);
+interface LoaderProps {
+  incrementInterval?: number;
+}
+
+export const Loader = (
+  { incrementInterval }: LoaderProps = { incrementInterval: 125 }
+) => {
+  const [percent, setPercent] = useState(5);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -12,12 +18,12 @@ export const Loader = () => {
         const diff = Math.random() * 10;
         return Math.min(previousPercent + diff, 95);
       });
-    }, 125);
+    }, incrementInterval);
 
     return () => {
       clearInterval(timer);
     };
-  }, []);
+  }, [incrementInterval]);
 
   return <ProgressBar variant="tile" value={Math.floor(percent)} />;
 };

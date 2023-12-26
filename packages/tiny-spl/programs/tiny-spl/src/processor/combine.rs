@@ -165,7 +165,8 @@ pub struct Combine<'info> {
             || leaf_delegate.key() == authority.key()
     )]
     pub authority: Signer<'info>,
-    pub tree_creator_or_delegate: Signer<'info>,
+    /// CHECK: This account is checked in CPI
+    pub tree_creator_or_delegate: UncheckedAccount<'info>,
     /// CHECK: This account is checked in instruction
     pub leaf_owner: UncheckedAccount<'info>,
     /// CHECK: This account is checked in instruction
