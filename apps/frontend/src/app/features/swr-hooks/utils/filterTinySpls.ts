@@ -3,6 +3,8 @@ import { PROGRAM_ID, TINY_SPL_AUTHORITY_SEED } from "@tiny-spl/contracts";
 
 import { ReadApiAsset } from "@/app/common/utils/WrapperConnection";
 
+import { getAssetCollectionId } from "./getAssetCollectionId";
+
 export const filterTinySpls = async (
   assets: ReadApiAsset[],
   connection: Connection
@@ -11,11 +13,7 @@ export const filterTinySpls = async (
     new Set(
       assets
         .filter((asset) => !asset.burnt)
-        .map(
-          (asset) =>
-            asset.grouping.find((group) => group.group_key === "collection")
-              ?.group_value
-        )
+        .map(getAssetCollectionId)
         .filter(Boolean) as string[]
     )
   );

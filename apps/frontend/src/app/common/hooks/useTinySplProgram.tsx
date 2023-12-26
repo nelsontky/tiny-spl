@@ -1,8 +1,8 @@
 import { AnchorProvider, Program } from "@coral-xyz/anchor";
 import { useConnection } from "@solana/wallet-adapter-react";
-import useSWRImmutable from "swr/immutable";
-import { idl, PROGRAM_ID, TinySpl } from "@tiny-spl/contracts";
 import { Keypair } from "@solana/web3.js";
+import { idl, PROGRAM_ID, TinySpl } from "@tiny-spl/contracts";
+import useSWRImmutable from "swr/immutable";
 
 const READONLY_WALLET = {
   publicKey: Keypair.generate().publicKey,

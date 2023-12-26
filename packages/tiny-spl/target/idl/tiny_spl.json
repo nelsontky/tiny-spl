@@ -169,7 +169,7 @@
         {
           "name": "treeCreatorOrDelegate",
           "isMut": false,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "collectionMint",
@@ -240,7 +240,7 @@
         {
           "name": "treeCreatorOrDelegate",
           "isMut": false,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "leafOwner",
@@ -363,7 +363,7 @@
         {
           "name": "treeCreatorOrDelegate",
           "isMut": false,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "leafOwner",
