@@ -76,6 +76,7 @@ export const useTinySplsByOwner = (walletAddress: string | undefined) => {
         )?.value;
         const symbol = items?.[0]?.content.metadata?.symbol;
         const logo = items?.[0]?.content?.links?.image;
+        const description = items?.[0]?.content.metadata?.description;
         const amount = items.reduce((acc, item) => {
           const currentAmount = getAssetAmount(item);
           return acc.add(new Decimal(currentAmount));
@@ -86,6 +87,7 @@ export const useTinySplsByOwner = (walletAddress: string | undefined) => {
           collectionName,
           symbol,
           logo,
+          description,
           amount: amount.toFixed(),
           assets: items,
         };

@@ -1,21 +1,19 @@
 import { redirect, useParams, useSearchParams } from "react-router-dom";
-import { Hourglass, Window, WindowHeader } from "react95";
+import { Hourglass, Window, WindowContent, WindowHeader } from "react95";
 
 import { truncatePublicKey } from "@/app/common/utils/truncatePublicKey";
 
 import { useOwnerTinySplMint } from "../../swr-hooks/hooks/useOwnerTinySplMint";
+import { MintBalances } from "./MintBalances";
+import { MintInformation } from "./MintInformation";
 
-export const MintPage = () => {
-  const { publicKey } = useParams<{ publicKey: string }>();
-  const [urlSearchParams] = useSearchParams();
-  const mintAddress = urlSearchParams.get("mint");
+interface MintPageProps {
+  publicKey: string;
+  mint: string;
+}
 
-  const { data } = useOwnerTinySplMint(publicKey, mintAddress);
-
-  if (typeof publicKey !== "string" || typeof mintAddress !== "string") {
-    // TODO: check if the public key is valid
-    return <>{redirect("/")}</>;
-  }
+export const MintPage = ({ mint, publicKey }: MintPageProps) => {
+  const { data } = useOwnerTinySplMint(publicKey, mint);
 
   if (!data) {
     return (
@@ -29,8 +27,11 @@ export const MintPage = () => {
     <div className="py-12">
       <Window className="w-full">
         <WindowHeader>
-          {data.collectionName} ({truncatePublicKey(data.collectionId, 8)})
+          {data.collectionName} (Owner: {truncatePublicKey(publicKey)})
         </WindowHeader>
+        <MintInformation ownerMintInfo={data} />
+        <h2 className="text-lg">Balances:</h2>
+        <MintBalances balances={data.assets} />
       </Window>
     </div>
   );

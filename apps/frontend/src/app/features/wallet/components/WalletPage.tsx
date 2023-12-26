@@ -17,7 +17,7 @@ export const WalletPage = () => {
   }
 
   if (mintAddress) {
-    return <MintPage />;
+    return <MintPage mint={mintAddress} publicKey={publicKey} />;
   }
 
   return (

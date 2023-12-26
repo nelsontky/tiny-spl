@@ -23,6 +23,8 @@ import {
 
 import { Loader } from "@/app/common/components/Loader";
 import { ChevronLeft } from "@/app/common/icons/ChevronLeft";
+import { formatAmount } from "@/app/common/utils/formatAmount";
+import { generateXrayCollectionLink } from "@/app/common/utils/generateXrayCollectionLink";
 import { truncatePublicKey } from "@/app/common/utils/truncatePublicKey";
 
 import { useTinySplsByOwner } from "../../swr-hooks/hooks/useTinySplsByOwner";
@@ -59,7 +61,7 @@ const columns: ColumnDef<TinySplRow>[] = [
               <div>{collectionName ?? ""}</div>
               <Anchor
                 className="!text-sm"
-                href={`https://xray.helius.xyz/token/${collectionId}?network=mainnet`}
+                href={generateXrayCollectionLink(collectionId)}
                 target="_blank"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -86,9 +88,7 @@ const columns: ColumnDef<TinySplRow>[] = [
         cell: (info) => {
           const amount = info.getValue();
           const symbol = info.row.original.symbol;
-          const formattedAmount = Intl.NumberFormat("en-US", {
-            currency: "USD",
-          }).format(amount);
+          const formattedAmount = formatAmount(amount);
 
           return (
             <div>
@@ -107,7 +107,6 @@ export const TinySplList = () => {
   const { publicKey } = useParams<{ publicKey: string }>();
   const { data } = useTinySplsByOwner(publicKey);
   const [sorting, setSorting] = useState<SortingState>([]);
-
   const table = useReactTable({
     data: data ?? [],
     columns,

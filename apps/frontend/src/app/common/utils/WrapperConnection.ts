@@ -426,6 +426,7 @@ export type ReadApiAsset = {
   creators: Metadata["creators"];
   grouping: Array<ReadApiAssetGrouping>;
   compression: ReadApiCompressionMetadata;
+  burnt: boolean;
 };
 
 export type ReadApiAssetList = {
