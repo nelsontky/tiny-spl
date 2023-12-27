@@ -18,6 +18,7 @@ import {
   TableHead,
   TableHeadCell,
   TableRow,
+  Tooltip,
 } from "react95";
 
 import { ChevronLeft } from "@/app/common/icons/ChevronLeft";
@@ -45,7 +46,9 @@ const columns: ColumnDef<ReadApiAsset>[] = [
           </Anchor>
         ),
         sortingFn: (a, b) =>
-          (a.original.id ?? "").localeCompare(b.original.id ?? ""),
+          (a.original.id ?? "")
+            .toLowerCase()
+            .localeCompare((b.original.id ?? "").toLowerCase()),
       },
     ],
   },
@@ -132,6 +135,25 @@ export const MintBalances = ({ balances, mutate }: MintBalancesProps) => {
         </TableHead>
         <TableBody>
           {table.getRowModel().rows.map((row) => {
+            const amount = getAssetAmount(row.original);
+            const splitButton = new Decimal(amount).lessThanOrEqualTo(1) ? (
+              <Tooltip
+                className="text-black"
+                text="Amount needs to be more than 1 for balance to be split"
+                enterDelay={0}
+              >
+                <Button disabled>Split</Button>
+              </Tooltip>
+            ) : (
+              <Button
+                onClick={() => {
+                  setMintToSplit(row.original);
+                }}
+              >
+                Split
+              </Button>
+            );
+
             return (
               <TableRow key={row.id} className="!h-14">
                 <TableDataCell className="flex justify-center !py-1">
@@ -148,13 +170,7 @@ export const MintBalances = ({ balances, mutate }: MintBalancesProps) => {
                   );
                 })}
                 <TableDataCell className="flex justify-center">
-                  <Button
-                    onClick={() => {
-                      setMintToSplit(row.original);
-                    }}
-                  >
-                    Split
-                  </Button>
+                  {splitButton}
                 </TableDataCell>
               </TableRow>
             );

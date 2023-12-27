@@ -1,5 +1,4 @@
-import { redirect, useParams, useSearchParams } from "react-router-dom";
-import { Hourglass, Window, WindowContent, WindowHeader } from "react95";
+import { Hourglass, Window, WindowHeader } from "react95";
 
 import { truncatePublicKey } from "@/app/common/utils/truncatePublicKey";
 

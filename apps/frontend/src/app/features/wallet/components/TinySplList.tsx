@@ -73,9 +73,9 @@ const columns: ColumnDef<TinySplRow>[] = [
           );
         },
         sortingFn: (a, b) =>
-          (a.original.collectionName ?? "").localeCompare(
-            b.original.collectionName ?? ""
-          ),
+          (a.original.collectionName ?? "")
+            .toLowerCase()
+            .localeCompare((b.original.collectionName ?? "").toLowerCase()),
       },
     ],
   },
