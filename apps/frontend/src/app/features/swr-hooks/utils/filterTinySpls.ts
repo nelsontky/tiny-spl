@@ -38,11 +38,8 @@ export const filterTinySpls = async (
     const collectionId = tinySplAuthorityAddresses[i]?.collectionId;
     if (accountInfo && collectionId) {
       const items = assets.filter((asset) => {
-        const assetCollectionId = asset.grouping.find(
-          (group) => group.group_key === "collection"
-        )?.group_value;
-
-        return assetCollectionId === collectionId;
+        const assetCollectionId = getAssetCollectionId(asset);
+        return !asset.burnt && assetCollectionId === collectionId;
       });
       tinySpls.push(...items);
     }

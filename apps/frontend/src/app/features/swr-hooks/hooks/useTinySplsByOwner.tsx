@@ -1,7 +1,8 @@
 import { useConnection } from "@solana/wallet-adapter-react";
 import Decimal from "decimal.js";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import useSWR from "swr";
+import useSWRImmutable from "swr/immutable";
 
 import { useWrapperConnection } from "@/app/common/hooks/useWrapperConnection";
 import {
@@ -12,6 +13,7 @@ import {
 import { TinySplRow } from "../types/TinySplRow";
 import { filterTinySpls } from "../utils/filterTinySpls";
 import { getAssetAmount } from "../utils/getAssetAmount";
+import { getAssetCollectionId } from "../utils/getAssetCollectionId";
 
 const useAssetsByOwner = (
   getAssetsByOwnerRpcInput: GetAssetsByOwnerRpcInput | undefined
@@ -46,16 +48,18 @@ export const useTinySplsByOwner = (walletAddress: string | undefined) => {
 
   const { connection } = useConnection();
 
-  const { mutate: mutateTinySpls, ...rest } = useSWR(
+  const {
+    mutate: mutateTinySpls,
+    data,
+    ...rest
+  } = useSWRImmutable(
     !assetsByOwner ? null : ["getTinySplsByOwner", assetsByOwner],
     async ([_, assetsByOwner]) => {
       const tinySpls = await filterTinySpls(assetsByOwner.items, connection);
 
       const groupedByCollectionId: Record<string, ReadApiAsset[]> = {};
       for (const tinySpl of tinySpls) {
-        const collectionId = tinySpl.grouping.find(
-          (grouping) => grouping.group_key === "collection"
-        )?.group_value;
+        const collectionId = getAssetCollectionId(tinySpl);
 
         if (!collectionId) {
           continue;
@@ -106,5 +110,19 @@ export const useTinySplsByOwner = (walletAddress: string | undefined) => {
     await mutateTinySpls();
   }, [mutateAssetsByOwner, mutateTinySpls]);
 
-  return Object.assign(rest, { mutate });
+  const mostRecentData = useRef<TinySplRow[] | undefined>();
+  useEffect(
+    function updateMostRecentData() {
+      if (data) {
+        mostRecentData.current = data;
+      }
+    },
+    [data]
+  );
+  const result = useMemo(() => {
+    const newData = data ?? mostRecentData.current;
+    return Object.assign(rest, { data: newData, mutate });
+  }, [data, mutate, rest]);
+
+  return result;
 };

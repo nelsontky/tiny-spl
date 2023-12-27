@@ -7,7 +7,7 @@ export const AppContainer = ({
   children: React.ReactNode;
   className?: string;
 }) => (
-  <div className={clsx("max-w-2xl w-full px-6 mx-auto", className)}>
+  <div className={clsx("max-w-3xl w-full px-6 mx-auto", className)}>
     {children}
   </div>
 );

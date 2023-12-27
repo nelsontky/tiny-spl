@@ -1,6 +1,8 @@
 import Decimal from "decimal.js";
+import { useEffect, useMemo, useRef } from "react";
 import useSWRImmutable from "swr/immutable";
 
+import { TinySplRow } from "../types/TinySplRow";
 import { getAssetAmount } from "../utils/getAssetAmount";
 import { useTinySplsByOwner } from "./useTinySplsByOwner";
 
@@ -17,8 +19,6 @@ export const useOwnerTinySplMint = (
         (tinySplRow) => tinySplRow.collectionId === mint
       );
 
-      console.log(collection);
-
       if (!collection) {
         return undefined;
       }
@@ -34,5 +34,19 @@ export const useOwnerTinySplMint = (
     }
   );
 
-  return Object.assign(rest, { data });
+  const mostRecentData = useRef<TinySplRow | undefined>();
+  useEffect(
+    function updateMostRecentData() {
+      if (data) {
+        mostRecentData.current = data;
+      }
+    },
+    [data]
+  );
+  const result = useMemo(() => {
+    const newData = data ?? mostRecentData.current;
+    return Object.assign(rest, { data: newData });
+  }, [data, rest]);
+
+  return result;
 };
