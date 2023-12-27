@@ -47,6 +47,7 @@ export const CombineTaskbar = ({
     function resetSelectedMints() {
       if (!sendTransactionResult) {
         setSelectedMints({});
+        setError(undefined);
       }
     },
     [sendTransactionResult, setSelectedMints]

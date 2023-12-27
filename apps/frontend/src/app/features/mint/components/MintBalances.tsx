@@ -30,6 +30,8 @@ import { getAssetAmount } from "../../swr-hooks/utils/getAssetAmount";
 import { CombineTaskbar } from "./CombineTaskbar";
 import { SplitDialog } from "./SplitDialog";
 
+const MAX_MINTS_TO_COMBINE = 2;
+
 const columns: ColumnDef<ReadApiAsset>[] = [
   {
     id: "id",
@@ -82,6 +84,7 @@ export const MintBalances = ({ balances, mutate }: MintBalancesProps) => {
   const [selectedMints, setSelectedMints] = useState<
     Record<string, ReadApiAsset>
   >({});
+  const mintCount = Object.keys(selectedMints).length;
 
   useEffect(
     function resetSelectedMints() {
@@ -107,6 +110,49 @@ export const MintBalances = ({ balances, mutate }: MintBalancesProps) => {
   if (!tableHeaders) {
     return null;
   }
+
+  const renderCombineCheckbox = (asset: ReadApiAsset) => {
+    const checked = !!selectedMints[asset.id];
+    const hasHitMaxSelected = mintCount >= MAX_MINTS_TO_COMBINE;
+    const disabled = !checked && hasHitMaxSelected;
+
+    const checkbox = (
+      <Checkbox
+        className="[&>div:before]:box-content [&>div>span:after]:box-content [&>div>span]:h-[20px]"
+        disabled={disabled}
+        checked={checked}
+        onChange={(e) => {
+          const checked = e.target.checked;
+
+          setSelectedMints((prev) => {
+            if (checked) {
+              return {
+                ...prev,
+                [asset.id]: asset,
+              };
+            }
+
+            delete prev[asset.id];
+            return { ...prev };
+          });
+        }}
+      />
+    );
+
+    if (disabled) {
+      return (
+        <Tooltip
+          className="text-black"
+          text={`You can only combine ${MAX_MINTS_TO_COMBINE} balances at a time`}
+          enterDelay={0}
+        >
+          {checkbox}
+        </Tooltip>
+      );
+    }
+
+    return checkbox;
+  };
 
   return (
     <>
@@ -173,25 +219,7 @@ export const MintBalances = ({ balances, mutate }: MintBalancesProps) => {
             return (
               <TableRow key={row.id} className="!h-14">
                 <TableDataCell className="flex justify-center !py-1">
-                  <Checkbox
-                    className="[&>div:before]:box-content [&>div>span:after]:box-content [&>div>span]:h-[20px]"
-                    checked={!!selectedMints[row.original.id]}
-                    onChange={(e) => {
-                      const checked = e.target.checked;
-
-                      setSelectedMints((prev) => {
-                        if (checked) {
-                          return {
-                            ...prev,
-                            [row.original.id]: row.original,
-                          };
-                        }
-
-                        delete prev[row.original.id];
-                        return { ...prev };
-                      });
-                    }}
-                  />
+                  {renderCombineCheckbox(row.original)}
                 </TableDataCell>
                 {row.getVisibleCells().map((cell) => {
                   return (
