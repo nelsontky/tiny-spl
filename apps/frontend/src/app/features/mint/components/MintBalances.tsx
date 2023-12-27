@@ -7,7 +7,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import Decimal from "decimal.js";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Anchor,
   Button,
@@ -83,6 +83,13 @@ export const MintBalances = ({ balances, mutate }: MintBalancesProps) => {
     Record<string, ReadApiAsset>
   >({});
 
+  useEffect(
+    function resetSelectedMints() {
+      setSelectedMints({});
+    },
+    [balances]
+  );
+
   const [sorting, setSorting] = useState<SortingState>([]);
   const table = useReactTable({
     data: balances,
@@ -110,7 +117,11 @@ export const MintBalances = ({ balances, mutate }: MintBalancesProps) => {
         }}
         mutate={mutate}
       />
-      <CombineTaskbar selectedMints={selectedMints} />
+      <CombineTaskbar
+        mutate={mutate}
+        selectedMints={selectedMints}
+        setSelectedMints={setSelectedMints}
+      />
       <Table className="h-[1px]">
         <TableHead>
           <TableRow>
