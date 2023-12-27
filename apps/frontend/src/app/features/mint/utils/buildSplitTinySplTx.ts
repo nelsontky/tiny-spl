@@ -5,7 +5,12 @@ import {
   PROGRAM_ID as COMPRESSION_PROGRAM_ID,
   SPL_NOOP_PROGRAM_ID,
 } from "@solana/spl-account-compression";
-import { AccountMeta, PublicKey, SystemProgram } from "@solana/web3.js";
+import {
+  AccountMeta,
+  ComputeBudgetProgram,
+  PublicKey,
+  SystemProgram,
+} from "@solana/web3.js";
 import { TINY_SPL_AUTHORITY_SEED, TinySpl } from "@tiny-spl/contracts";
 
 import {
@@ -122,7 +127,12 @@ export const buildSplitTinySplTx = async ({
 
   return buildTxsFromIxs({
     connection,
-    ixs: [ix],
+    ixs: [
+      ComputeBudgetProgram.setComputeUnitLimit({
+        units: 14_000_000,
+      }),
+      ix,
+    ],
     payer: signer,
   });
 };

@@ -11,9 +11,9 @@ import {
   TINY_SPL_AUTHORITY_SEED,
   CONNECTION,
   PROGRAM,
-  SIGNER,
   TOKEN_MINT_KEY,
   TREE_ID,
+  TREE_CREATOR,
 } from "./constants";
 
 export async function setTreeDelegate() {
@@ -30,20 +30,22 @@ export async function setTreeDelegate() {
 
   const ix = createSetTreeDelegateInstruction({
     merkleTree: TREE_ID,
-    newTreeDelegate: tinySplAuthority,
+    newTreeDelegate: new PublicKey(
+      "B8WiiEc4KBcfL7nTcSc7urC9DiyBVZ1W3wQaahwzGpST"
+    ),
     treeAuthority: treeAuthority,
-    treeCreator: SIGNER.publicKey,
+    treeCreator: TREE_CREATOR.publicKey,
   });
   const { blockhash, lastValidBlockHeight } =
     await CONNECTION.getLatestBlockhash();
   const messageV0 = new TransactionMessage({
-    payerKey: SIGNER.publicKey,
+    payerKey: TREE_CREATOR.publicKey,
     recentBlockhash: blockhash,
     instructions: [ix],
   }).compileToV0Message();
   const transaction = new VersionedTransaction(messageV0);
 
-  transaction.sign([SIGNER]);
+  transaction.sign([TREE_CREATOR]);
 
   const txid = await CONNECTION.sendTransaction(transaction, {
     skipPreflight: true,

@@ -13,7 +13,7 @@ interface MintPageProps {
 }
 
 export const MintPage = ({ mint, publicKey }: MintPageProps) => {
-  const { data } = useOwnerTinySplMint(publicKey, mint);
+  const { data, mutate } = useOwnerTinySplMint(publicKey, mint);
 
   if (!data) {
     return (
@@ -31,7 +31,7 @@ export const MintPage = ({ mint, publicKey }: MintPageProps) => {
         </WindowHeader>
         <MintInformation ownerMintInfo={data} />
         <h2 className="text-lg">Balances:</h2>
-        <MintBalances balances={data.assets} />
+        <MintBalances balances={data.assets} mutate={mutate} />
       </Window>
     </div>
   );

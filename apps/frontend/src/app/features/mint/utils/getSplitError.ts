@@ -12,7 +12,7 @@ export const getSplitError = (
     new Decimal(leftAmount).lessThanOrEqualTo(0) ||
     new Decimal(rightAmount).lessThanOrEqualTo(0)
   ) {
-    return "Split amount must be greater than 0";
+    return "Both split amounts must be greater than 0";
   }
 
   return null;

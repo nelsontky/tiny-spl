@@ -23,7 +23,6 @@ import {
 import { ChevronLeft } from "@/app/common/icons/ChevronLeft";
 import { formatAmount } from "@/app/common/utils/formatAmount";
 import { generateXrayCollectionLink } from "@/app/common/utils/generateXrayCollectionLink";
-import { truncatePublicKey } from "@/app/common/utils/truncatePublicKey";
 import { ReadApiAsset } from "@/app/common/utils/WrapperConnection";
 
 import { getAssetAmount } from "../../swr-hooks/utils/getAssetAmount";
@@ -38,10 +37,11 @@ const columns: ColumnDef<ReadApiAsset>[] = [
         accessorKey: "id",
         cell: (info) => (
           <Anchor
+            className="break-all"
             href={generateXrayCollectionLink(info.getValue() ?? "")}
             target="_blank"
           >
-            {truncatePublicKey(info.getValue(), 10)}
+            {info.getValue()}
           </Anchor>
         ),
         sortingFn: (a, b) =>
@@ -70,9 +70,10 @@ const columns: ColumnDef<ReadApiAsset>[] = [
 
 interface MintBalancesProps {
   balances: ReadApiAsset[];
+  mutate: () => Promise<any>;
 }
 
-export const MintBalances = ({ balances }: MintBalancesProps) => {
+export const MintBalances = ({ balances, mutate }: MintBalancesProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const table = useReactTable({
     data: balances,
@@ -100,6 +101,7 @@ export const MintBalances = ({ balances }: MintBalancesProps) => {
         onClose={() => {
           setMintToSplit(null);
         }}
+        mutate={mutate}
       />
       <Table className="h-[1px]">
         <TableHead>
