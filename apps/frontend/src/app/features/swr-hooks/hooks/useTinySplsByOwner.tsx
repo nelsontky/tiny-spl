@@ -14,7 +14,7 @@ import { filterTinySpls } from "../utils/filterTinySpls";
 import { getAssetAmount } from "../utils/getAssetAmount";
 import { getAssetCollectionId } from "../utils/getAssetCollectionId";
 
-const PAGE_SIZE = 60;
+const PAGE_SIZE = 25;
 
 const useTinySplListByOwner = (owner: string | undefined) => {
   const wrapperConnection = useWrapperConnection();

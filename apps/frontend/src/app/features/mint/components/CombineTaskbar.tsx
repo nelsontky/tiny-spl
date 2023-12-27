@@ -47,15 +47,17 @@ export const CombineTaskbar = ({
     function resetSelectedMints() {
       if (!sendTransactionResult) {
         setSelectedMints({});
-        setError(undefined);
       }
     },
     [sendTransactionResult, setSelectedMints]
   );
 
-  if (mintCount < 2) {
-    return null;
-  }
+  useEffect(
+    function resetErrors() {
+      setError(undefined);
+    },
+    [selectedMints]
+  );
 
   return (
     <>
@@ -66,49 +68,51 @@ export const CombineTaskbar = ({
         setSendTransactionResult={setSendTransactionResult}
         setError={setError}
       />
-      <AppBar className="fixed bottom-0 !left-0 !top-auto !right-auto z-10">
-        <Toolbar className="flex justify-end">
-          <div className="flex flex-col items-end">
-            <Button
-              disabled={disabled}
-              size="lg"
-              className={clsx("font-bold", !disabled && "animate-bounce")}
-              onClick={async () => {
-                if (!publicKey) {
-                  return;
-                }
+      {mintCount < 2 ? null : (
+        <AppBar className="fixed bottom-0 !left-0 !top-auto !right-auto z-10">
+          <Toolbar className="flex justify-end">
+            <div className="flex flex-col items-end">
+              <Button
+                disabled={disabled}
+                size="lg"
+                className={clsx("font-bold", !disabled && "animate-bounce")}
+                onClick={async () => {
+                  if (!publicKey) {
+                    return;
+                  }
 
-                try {
-                  setError(undefined);
-                  setLoading(true);
+                  try {
+                    setError(undefined);
+                    setLoading(true);
 
-                  const { blockhash, lastValidBlockHeight, transaction } =
-                    await buildCombineTinySplTx({
-                      connection,
-                      signer: publicKey,
-                      tinySplProgram,
-                      assets: Object.values(selectedMints),
+                    const { blockhash, lastValidBlockHeight, transaction } =
+                      await buildCombineTinySplTx({
+                        connection,
+                        signer: publicKey,
+                        tinySplProgram,
+                        assets: Object.values(selectedMints),
+                      });
+
+                    const txId = await sendTransaction(transaction, connection);
+                    setSendTransactionResult({
+                      blockhash,
+                      lastValidBlockHeight,
+                      txId,
                     });
-
-                  const txId = await sendTransaction(transaction, connection);
-                  setSendTransactionResult({
-                    blockhash,
-                    lastValidBlockHeight,
-                    txId,
-                  });
-                } catch (e: any) {
-                  setError(`An error has occurred: "${e.message}"`);
-                } finally {
-                  setLoading(false);
-                }
-              }}
-            >
-              {!loading ? `Combine (${mintCount})` : "Loading..."}
-            </Button>
-            {error && <p className="text-sm text-red-500">{error}</p>}
-          </div>
-        </Toolbar>
-      </AppBar>
+                  } catch (e: any) {
+                    setError(`An error has occurred: "${e.message}"`);
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+              >
+                {!loading ? `Combine (${mintCount})` : "Loading..."}
+              </Button>
+              {error && <p className="text-sm text-red-500">{error}</p>}
+            </div>
+          </Toolbar>
+        </AppBar>
+      )}
     </>
   );
 };
@@ -179,7 +183,6 @@ const TransactionWindowContent = ({
         setError(`An error has occurred: "${err.message}"`);
       }}
       onSuccess={async () => {
-        await mutate();
         setSuccess(true);
       }}
     />
@@ -191,8 +194,9 @@ const TransactionWindowContent = ({
         <span>Combining tokens</span>
         {success && (
           <Button
-            onClick={() => {
+            onClick={async () => {
               setSendTransactionResult(null);
+              mutate();
             }}
           >
             <span className="close-icon" />
