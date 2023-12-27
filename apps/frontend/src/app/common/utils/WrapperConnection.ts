@@ -253,6 +253,7 @@ export class WrapperConnection extends Connection {
       sortBy,
       before,
       after,
+      displayOptions,
     }: GetAssetsByOwnerRpcInput,
     axiosRequestConfig?: AxiosRequestConfig
   ): Promise<ReadApiAssetList> {
@@ -277,6 +278,7 @@ export class WrapperConnection extends Connection {
           limit: limit ?? null,
           page: page ?? 1,
           sortBy: sortBy ?? null,
+          displayOptions: displayOptions ?? null,
         },
       },
       axiosRequestConfig
@@ -409,6 +411,9 @@ export type GetAssetsByOwnerRpcInput = {
   before?: Option<string>;
   after?: Option<string>;
   sortBy?: Option<ReadApiParamAssetSortBy>;
+  displayOptions?: Option<{
+    showCollectionMetadata?: boolean;
+  }>;
 };
 
 export type ReadApiAsset = {
