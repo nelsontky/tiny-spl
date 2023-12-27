@@ -128,6 +128,9 @@ export const buildSplitTinySplTx = async ({
   return buildTxsFromIxs({
     connection,
     ixs: [
+      ComputeBudgetProgram.setComputeUnitPrice({
+        microLamports: 50_000,
+      }),
       ComputeBudgetProgram.setComputeUnitLimit({
         units: 14_000_000,
       }),
