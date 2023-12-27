@@ -1,4 +1,3 @@
-import { useConnection } from "@solana/wallet-adapter-react";
 import Decimal from "decimal.js";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import useSWR from "swr";
@@ -15,48 +14,63 @@ import { filterTinySpls } from "../utils/filterTinySpls";
 import { getAssetAmount } from "../utils/getAssetAmount";
 import { getAssetCollectionId } from "../utils/getAssetCollectionId";
 
-const useAssetsByOwner = (
-  getAssetsByOwnerRpcInput: GetAssetsByOwnerRpcInput | undefined
-) => {
+const PAGE_SIZE = 60;
+
+const useTinySplListByOwner = (owner: string | undefined) => {
   const wrapperConnection = useWrapperConnection();
 
   const swr = useSWR(
-    !getAssetsByOwnerRpcInput
-      ? null
-      : ["getAssetsByOwner", getAssetsByOwnerRpcInput],
-    ([_, getAssetsByOwnerRpcInput]) =>
-      wrapperConnection.getAssetsByOwner(getAssetsByOwnerRpcInput)
+    !owner ? null : ["getAssetsByOwner", owner],
+    async ([_, owner]) => {
+      let result: ReadApiAsset[] = [];
+      let currentPage = 1;
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const assetsByOwnerRpcInput: GetAssetsByOwnerRpcInput = {
+          ownerAddress: owner,
+          limit: PAGE_SIZE,
+          page: currentPage,
+          displayOptions: {
+            showCollectionMetadata: false,
+          },
+        };
+
+        const assetsByOwner = await wrapperConnection.getAssetsByOwner(
+          assetsByOwnerRpcInput
+        );
+
+        if (!assetsByOwner.items.length) {
+          break;
+        }
+
+        const tinySpls = await filterTinySpls(
+          assetsByOwner.items,
+          wrapperConnection
+        );
+
+        result.push(...tinySpls);
+
+        currentPage += 1;
+      }
+
+      return result;
+    }
   );
 
   return swr;
 };
 
 export const useTinySplsByOwner = (walletAddress: string | undefined) => {
-  const getAssetsByOwnerRpcInput = useMemo(
-    () =>
-      !walletAddress
-        ? undefined
-        : {
-            ownerAddress: walletAddress,
-          },
-    [walletAddress]
-  );
-
-  const { data: assetsByOwner, mutate: mutateAssetsByOwner } = useAssetsByOwner(
-    getAssetsByOwnerRpcInput
-  );
-
-  const { connection } = useConnection();
+  const { data: tinySpls, mutate: mutateAssetsByOwner } =
+    useTinySplListByOwner(walletAddress);
 
   const {
     mutate: mutateTinySpls,
     data,
     ...rest
   } = useSWRImmutable(
-    !assetsByOwner ? null : ["getTinySplsByOwner", assetsByOwner],
-    async ([_, assetsByOwner]) => {
-      const tinySpls = await filterTinySpls(assetsByOwner.items, connection);
-
+    !tinySpls ? null : ["getTinySplsByOwner", tinySpls],
+    async ([_, tinySpls]) => {
       const groupedByCollectionId: Record<string, ReadApiAsset[]> = {};
       for (const tinySpl of tinySpls) {
         const collectionId = getAssetCollectionId(tinySpl);

@@ -23,7 +23,7 @@ export const MintPage = ({ mint, publicKey }: MintPageProps) => {
   }
 
   return (
-    <div className="py-12">
+    <div className="pt-12 pb-24">
       <Window className="w-full">
         <WindowHeader>
           {data.collectionName} (Owner: {truncatePublicKey(publicKey)})

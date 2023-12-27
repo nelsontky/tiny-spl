@@ -27,6 +27,7 @@ import { generateXrayCollectionLink } from "@/app/common/utils/generateXrayColle
 import { ReadApiAsset } from "@/app/common/utils/WrapperConnection";
 
 import { getAssetAmount } from "../../swr-hooks/utils/getAssetAmount";
+import { CombineTaskbar } from "./CombineTaskbar";
 import { SplitDialog } from "./SplitDialog";
 
 const columns: ColumnDef<ReadApiAsset>[] = [
@@ -77,6 +78,11 @@ interface MintBalancesProps {
 }
 
 export const MintBalances = ({ balances, mutate }: MintBalancesProps) => {
+  const [mintToSplit, setMintToSplit] = useState<ReadApiAsset | null>(null);
+  const [selectedMints, setSelectedMints] = useState<
+    Record<string, ReadApiAsset>
+  >({});
+
   const [sorting, setSorting] = useState<SortingState>([]);
   const table = useReactTable({
     data: balances,
@@ -91,8 +97,6 @@ export const MintBalances = ({ balances, mutate }: MintBalancesProps) => {
 
   const tableHeaders = table.getHeaderGroups().at(-1);
 
-  const [mintToSplit, setMintToSplit] = useState<ReadApiAsset | null>(null);
-
   if (!tableHeaders) {
     return null;
   }
@@ -106,6 +110,7 @@ export const MintBalances = ({ balances, mutate }: MintBalancesProps) => {
         }}
         mutate={mutate}
       />
+      <CombineTaskbar selectedMints={selectedMints} />
       <Table className="h-[1px]">
         <TableHead>
           <TableRow>
@@ -157,7 +162,25 @@ export const MintBalances = ({ balances, mutate }: MintBalancesProps) => {
             return (
               <TableRow key={row.id} className="!h-14">
                 <TableDataCell className="flex justify-center !py-1">
-                  <Checkbox className="[&>div:before]:box-content [&>div>span:after]:box-content [&>div>span]:h-[20px]" />
+                  <Checkbox
+                    className="[&>div:before]:box-content [&>div>span:after]:box-content [&>div>span]:h-[20px]"
+                    checked={!!selectedMints[row.original.id]}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+
+                      setSelectedMints((prev) => {
+                        if (checked) {
+                          return {
+                            ...prev,
+                            [row.original.id]: row.original,
+                          };
+                        }
+
+                        delete prev[row.original.id];
+                        return { ...prev };
+                      });
+                    }}
+                  />
                 </TableDataCell>
                 {row.getVisibleCells().map((cell) => {
                   return (
