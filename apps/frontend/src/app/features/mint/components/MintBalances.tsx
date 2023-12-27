@@ -114,7 +114,7 @@ export const MintBalances = ({ balances, mutate }: MintBalancesProps) => {
   const renderCombineCheckbox = (asset: ReadApiAsset) => {
     const checked = !!selectedMints[asset.id];
     const hasHitMaxSelected = mintCount >= MAX_MINTS_TO_COMBINE;
-    const disabled = !checked && hasHitMaxSelected;
+    const disabled = (!checked && hasHitMaxSelected) || balances.length < 2;
 
     const checkbox = (
       <Checkbox
@@ -143,7 +143,11 @@ export const MintBalances = ({ balances, mutate }: MintBalancesProps) => {
       return (
         <Tooltip
           className="text-black"
-          text={`You can only combine ${MAX_MINTS_TO_COMBINE} balances at a time`}
+          text={
+            balances.length < 2
+              ? "You must have more than 1 balance to combine"
+              : `You can only combine ${MAX_MINTS_TO_COMBINE} balances at a time`
+          }
           enterDelay={0}
         >
           {checkbox}
