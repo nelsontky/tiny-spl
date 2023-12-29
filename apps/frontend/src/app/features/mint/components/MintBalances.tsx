@@ -28,6 +28,7 @@ import { generateXrayCollectionLink } from "@/app/common/utils/generateXrayColle
 import { ReadApiAsset } from "@/app/common/utils/WrapperConnection";
 
 import { getAssetAmount } from "../../swr-hooks/utils/getAssetAmount";
+import { CombineAndSplitHelp } from "./CombineAndSplitHelp";
 import { CombineTaskbar } from "./CombineTaskbar";
 import { SplitDialog } from "./SplitDialog";
 
@@ -189,7 +190,9 @@ export const MintBalances = ({
         <TableHead>
           <TableRow>
             {isConnectedWalletOwner && (
-              <TableHeadCell disabled>Combine</TableHeadCell>
+              <TableHeadCell disabled className="flex items-center">
+                Combine <CombineAndSplitHelp />
+              </TableHeadCell>
             )}
             {tableHeaders.headers.map((header) => {
               return (
@@ -211,7 +214,11 @@ export const MintBalances = ({
                 </TableHeadCell>
               );
             })}
-            {isConnectedWalletOwner && <TableHeadCell disabled />}
+            {isConnectedWalletOwner && (
+              <TableHeadCell disabled className="flex items-center">
+                Split <CombineAndSplitHelp />
+              </TableHeadCell>
+            )}
           </TableRow>
         </TableHead>
         <TableBody>

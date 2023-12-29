@@ -63,7 +63,6 @@ export const CombineTaskbar = ({
     <>
       <TransactionWindow
         mutate={mutate}
-        selectedMints={selectedMints}
         sendTransactionResult={sendTransactionResult}
         setSendTransactionResult={setSendTransactionResult}
         setError={setError}
@@ -122,7 +121,6 @@ interface TransactionWindowProps {
   setSendTransactionResult: (result: SendTransactionResult | null) => void;
   setError: (error: string | undefined) => void;
   mutate: () => Promise<any>;
-  selectedMints: Record<string, ReadApiAsset>;
 }
 
 const TransactionWindow = (props: TransactionWindowProps) => {
@@ -141,16 +139,8 @@ const TransactionWindowContent = ({
   sendTransactionResult,
   setError,
   setSendTransactionResult,
-  selectedMints,
 }: TransactionWindowProps) => {
   const [success, setSuccess] = useState(false);
-
-  const combinedAmount = Object.values(selectedMints).reduce(
-    (acc, mint) => new Decimal(getAssetAmount(mint) ?? "0").add(acc),
-    new Decimal(0)
-  );
-  const symbol =
-    Object.values(selectedMints)[0]?.content.metadata?.symbol ?? "";
 
   const content = success ? (
     <div>
@@ -159,12 +149,7 @@ const TransactionWindowContent = ({
         src="/assets/smiley-face.png"
         alt="Smiley face"
       />
-      <span>
-        Successfully combined tokens into{" "}
-        <span className="font-bold">
-          {formatAmount(combinedAmount.toFixed())} {symbol}
-        </span>
-      </span>
+      <span>Successfully combined tokens!</span>
       <div className="flex justify-end">
         <Button
           onClick={() => {
