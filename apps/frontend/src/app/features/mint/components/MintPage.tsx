@@ -28,9 +28,13 @@ export const MintPage = ({ mint, publicKey }: MintPageProps) => {
         <WindowHeader>
           {data.collectionName} (Owner: {truncatePublicKey(publicKey)})
         </WindowHeader>
-        <MintInformation ownerMintInfo={data} />
+        <MintInformation ownerPublicKey={publicKey} ownerMintInfo={data} />
         <h2 className="text-lg">Balances:</h2>
-        <MintBalances balances={data.assets} mutate={mutate} />
+        <MintBalances
+          ownerPublicKey={publicKey}
+          balances={data.assets}
+          mutate={mutate}
+        />
       </Window>
     </div>
   );
