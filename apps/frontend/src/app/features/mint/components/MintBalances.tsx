@@ -169,18 +169,22 @@ export const MintBalances = ({
 
   return (
     <>
-      <SplitDialog
-        mintDetails={mintToSplit}
-        onClose={() => {
-          setMintToSplit(null);
-        }}
-        mutate={mutate}
-      />
-      <CombineTaskbar
-        mutate={mutate}
-        selectedMints={selectedMints}
-        setSelectedMints={setSelectedMints}
-      />
+      {isConnectedWalletOwner && (
+        <>
+          <SplitDialog
+            mintDetails={mintToSplit}
+            onClose={() => {
+              setMintToSplit(null);
+            }}
+            mutate={mutate}
+          />
+          <CombineTaskbar
+            mutate={mutate}
+            selectedMints={selectedMints}
+            setSelectedMints={setSelectedMints}
+          />
+        </>
+      )}
       <Table className="h-[1px]">
         <TableHead>
           <TableRow>
