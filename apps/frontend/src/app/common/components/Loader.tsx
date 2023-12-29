@@ -7,9 +7,7 @@ interface LoaderProps {
   incrementInterval?: number;
 }
 
-export const Loader = (
-  { incrementInterval }: LoaderProps = { incrementInterval: 125 }
-) => {
+export const Loader = ({ incrementInterval }: LoaderProps) => {
   const [percent, setPercent] = useState(5);
 
   useEffect(() => {
@@ -18,7 +16,7 @@ export const Loader = (
         const diff = Math.random() * 10;
         return Math.min(previousPercent + diff, 95);
       });
-    }, incrementInterval);
+    }, incrementInterval ?? 500);
 
     return () => {
       clearInterval(timer);

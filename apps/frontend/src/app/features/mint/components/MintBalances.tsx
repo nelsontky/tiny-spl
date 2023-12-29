@@ -1,3 +1,4 @@
+import { useWallet } from "@solana/wallet-adapter-react";
 import {
   ColumnDef,
   flexRender,
@@ -78,14 +79,21 @@ const columns: ColumnDef<ReadApiAsset>[] = [
 interface MintBalancesProps {
   balances: ReadApiAsset[];
   mutate: () => Promise<any>;
+  ownerPublicKey: string;
 }
 
-export const MintBalances = ({ balances, mutate }: MintBalancesProps) => {
+export const MintBalances = ({
+  balances,
+  mutate,
+  ownerPublicKey,
+}: MintBalancesProps) => {
   const [mintToSplit, setMintToSplit] = useState<ReadApiAsset | null>(null);
   const [selectedMints, setSelectedMints] = useState<
     Record<string, ReadApiAsset>
   >({});
   const mintCount = Object.keys(selectedMints).length;
+  const { publicKey } = useWallet();
+  const isConnectedWalletOwner = publicKey?.toBase58() === ownerPublicKey;
 
   useEffect(
     function resetSelectedMints() {
@@ -176,7 +184,9 @@ export const MintBalances = ({ balances, mutate }: MintBalancesProps) => {
       <Table className="h-[1px]">
         <TableHead>
           <TableRow>
-            <TableHeadCell disabled>Combine</TableHeadCell>
+            {isConnectedWalletOwner && (
+              <TableHeadCell disabled>Combine</TableHeadCell>
+            )}
             {tableHeaders.headers.map((header) => {
               return (
                 <TableHeadCell
@@ -197,7 +207,7 @@ export const MintBalances = ({ balances, mutate }: MintBalancesProps) => {
                 </TableHeadCell>
               );
             })}
-            <TableHeadCell disabled />
+            {isConnectedWalletOwner && <TableHeadCell disabled />}
           </TableRow>
         </TableHead>
         <TableBody>
@@ -223,9 +233,11 @@ export const MintBalances = ({ balances, mutate }: MintBalancesProps) => {
 
             return (
               <TableRow key={row.id} className="!h-14">
-                <TableDataCell className="flex justify-center !py-1">
-                  {renderCombineCheckbox(row.original)}
-                </TableDataCell>
+                {isConnectedWalletOwner && (
+                  <TableDataCell className="flex justify-center !py-1">
+                    {renderCombineCheckbox(row.original)}
+                  </TableDataCell>
+                )}
                 {row.getVisibleCells().map((cell) => {
                   return (
                     <TableDataCell key={cell.id}>
@@ -236,9 +248,11 @@ export const MintBalances = ({ balances, mutate }: MintBalancesProps) => {
                     </TableDataCell>
                   );
                 })}
-                <TableDataCell className="flex justify-center">
-                  {splitButton}
-                </TableDataCell>
+                {isConnectedWalletOwner && (
+                  <TableDataCell className="flex justify-center">
+                    {splitButton}
+                  </TableDataCell>
+                )}
               </TableRow>
             );
           })}
