@@ -183,6 +183,7 @@ const TransactionWindowContent = ({
         setError(`An error has occurred: "${err.message}"`);
       }}
       onSuccess={async () => {
+        await mutate();
         setSuccess(true);
       }}
     />
@@ -196,7 +197,6 @@ const TransactionWindowContent = ({
           <Button
             onClick={async () => {
               setSendTransactionResult(null);
-              mutate();
             }}
           >
             <span className="close-icon" />
