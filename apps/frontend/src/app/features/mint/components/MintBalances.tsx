@@ -63,7 +63,8 @@ const columns: ColumnDef<ReadApiAsset>[] = [
         accessorKey: "content",
         cell: (info) => {
           const amount = getAssetAmount(info.row.original);
-          return formatAmount(amount);
+          const formattedHelp = formatAmount(amount);
+          return formattedHelp === "0" ? "Loading..." : formattedHelp;
         },
         sortingFn: (a, b) =>
           new Decimal(getAssetAmount(a.original)).cmp(
