@@ -66,14 +66,13 @@ export const MainPage = () => {
           </div>
           <div className="space-y-4">
             <p>
-              Welcome! Tiny SPL is a new token standard on Solana that allows
-              you to own tokens and not pay for rent .
+              Tiny SPL is a new token standard that lets you own tokens without
+              worrying about rent fees.
             </p>
             <p>
-              On this site you will be able to manage your tiny SPL tokens.
-              Click the button below to connect to your Solana wallet, or you
-              could read on to learn more before coming back to connect your
-              wallet!
+              Easily manage your Tiny SPL tokens on this site! Click below to
+              connect your Solana wallet or read on for more details before
+              connecting later!
               <div className="mt-4 w-full flex justify-center">
                 <AppWalletMultiButton>Get started!</AppWalletMultiButton>
               </div>
