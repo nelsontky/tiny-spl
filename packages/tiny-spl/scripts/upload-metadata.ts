@@ -19,7 +19,7 @@ const PART_LENGTH = 920;
 const TRANSACTION_CHUNK_SIZE = 3;
 
 const computeBudgetIx = ComputeBudgetProgram.setComputeUnitPrice({
-  microLamports: 50000,
+  microLamports: 50_000,
 });
 
 const metadata = generateMetaData();

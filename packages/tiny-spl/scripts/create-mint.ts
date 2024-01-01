@@ -17,7 +17,7 @@ import {
 import { TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/utils/token";
 
 const computeBudgetIx = ComputeBudgetProgram.setComputeUnitPrice({
-  microLamports: 50000,
+  microLamports: 1,
 });
 
 async function createMint() {

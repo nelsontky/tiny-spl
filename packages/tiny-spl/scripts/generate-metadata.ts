@@ -6,17 +6,19 @@ import * as path from "path";
  * @returns {string} metadata json as a string
  */
 export default function generateMetaData(): string {
-  const imageFile = fs.readFileSync(
-    path.join(__dirname, "assets", "image.webp")
-  );
-  const imageBase64 = imageFile.toString("base64");
-  const imageUri = `data:image/webp;base64,${imageBase64}`;
+  // const imageFile = fs.readFileSync(
+  //   path.join(__dirname, "assets", "image.webp")
+  // );
+  // const imageBase64 = imageFile.toString("base64");
+  // const imageUri = `data:image/webp;base64,${imageBase64}`;
 
   const metadataFile = fs.readFileSync(
     path.join(__dirname, "assets", "metadata.json")
   );
   const metadata = JSON.parse(metadataFile.toString());
-  metadata.image = imageUri;
+  metadata.image = `https://metadata.tinys.pl/tx?id=41JP4i5hwPm3c8k39EH9jS4S1hunPDoP8wueAVFMTx8k9XD4TJYB29DCzLjVLJKqiDim8puGYUEnjWbptudjTznX&contentType=${encodeURIComponent(
+    "image/webp"
+  )}`;
 
   return JSON.stringify(metadata);
 }
