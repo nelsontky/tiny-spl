@@ -20,7 +20,7 @@ export const fetchTransactionMetadata = async (
     });
 
     const logs = transaction?.meta?.innerInstructions?.[0]?.instructions?.map(
-      (ix) => new TextDecoder().decode(bs58.decode(ix.data))
+      (ix) => bs58.decode(ix.data)
     );
 
     if (!logs) {
@@ -31,7 +31,21 @@ export const fetchTransactionMetadata = async (
       return;
     }
 
-    response.send(JSON.parse(logs.join("")));
+    const uint8Array = Uint8Array.from(
+      logs.reduce((acc, curr) => {
+        acc.push(...curr);
+        return acc;
+      }, Array<number>())
+    );
+    const buffer = Buffer.from(uint8Array);
+
+    const contentType =
+      typeof request.query.contentType === "string"
+        ? request.query.contentType
+        : "application/json";
+    response.setHeader("Content-Type", contentType);
+
+    response.send(buffer);
   } catch {
     response.status(500).send({
       status: 500,
