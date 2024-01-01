@@ -31,7 +31,7 @@ export async function setTreeDelegate() {
   const ix = createSetTreeDelegateInstruction({
     merkleTree: TREE_ID,
     newTreeDelegate: new PublicKey(
-      "B8WiiEc4KBcfL7nTcSc7urC9DiyBVZ1W3wQaahwzGpST"
+      "EzGv9FqDepT6winVNWGiLVrTKjPD5KgB2jTiHhmFR4X6"
     ),
     treeAuthority: treeAuthority,
     treeCreator: TREE_CREATOR.publicKey,

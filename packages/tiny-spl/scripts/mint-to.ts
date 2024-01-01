@@ -56,7 +56,7 @@ async function mintTo() {
   );
 
   const ix = await PROGRAM.methods
-    .mintTo(new BN(69))
+    .mintTo(new BN(1000))
     .accounts({
       bubblegumSigner,
       collectionMetadata: metadata,
@@ -70,7 +70,7 @@ async function mintTo() {
       mplBubblegumProgram: BUBBLEGUM_PROGRAM_ID,
       tokenMetadataProgram: mplTokenMetadataProgramId,
       treeAuthority,
-      newLeafOwner: RECEIVER_ID,
+      newLeafOwner: SIGNER.publicKey,
       treeCreatorOrDelegate: TREE_CREATOR.publicKey,
     })
     .instruction();
