@@ -19,7 +19,7 @@ export const AppBar = () => {
     <>
       <React95AppBar className="h-12 z-10">
         <Toolbar className="flex justify-between">
-          <div>
+          <div className="flex gap-3">
             <Button
               className="font-bold flex items-center gap-1"
               onClick={async () => {
@@ -34,6 +34,18 @@ export const AppBar = () => {
                 alt="windows icon"
               />
               Home
+            </Button>
+            <Button
+              className="font-bold"
+              as="a"
+              // destructured to overcome typecheck
+              {...{
+                target: "_blank",
+                rel: "noopener noreferrer",
+                href: "https://github.com/nelsontky/tiny-spl",
+              }}
+            >
+              GitHub
             </Button>
           </div>
           <AppWalletMultiButton />

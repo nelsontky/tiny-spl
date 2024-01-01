@@ -162,7 +162,11 @@ export const TinySplList = () => {
       <>
         <Table>{tableHead}</Table>
         <WindowContent className="text-center">
-          No Tiny SPLs found in this wallet!
+          No Tiny SPLs found in this wallet, you can mint some for free{" "}
+          <Anchor as={Link} {...{ to: "/mint" }}>
+            here
+          </Anchor>
+          !
         </WindowContent>
       </>
     );

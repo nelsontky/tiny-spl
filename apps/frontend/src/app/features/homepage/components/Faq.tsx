@@ -19,8 +19,8 @@ export const Faq = () => (
         <p>
           Traditionally, token balances are stored on-chain. Keeping this data
           on-chain takes up space, so Solana charges a "rent" fee of ~0.002 SOL
-          for the storage. i.e. you paid ~0.002 SOL to store information about
-          how much BONK your wallet owns on-chain.
+          for the storage. i.e. you paid ~0.002 SOL to store information on how
+          much BONK your wallet owns on-chain.
         </p>
         <p>
           With the price of SOL rapidly increasing, this rent fee is getting
