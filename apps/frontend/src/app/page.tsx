@@ -1,6 +1,6 @@
 "use client";
 
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 
 import { AppBar } from "./common/components/AppBar";
 import { AppContainer } from "./common/components/AppContainer";
@@ -12,11 +12,14 @@ const router =
     ? createBrowserRouter([
         {
           path: "/",
-          element: <MainPage />,
-        },
-        {
-          path: "/:publicKey",
-          element: <WalletPage />,
+          element: <Root />,
+          children: [
+            { index: true, element: <MainPage /> },
+            {
+              path: "/:publicKey",
+              element: <WalletPage />,
+            },
+          ],
         },
       ])
     : undefined;
@@ -26,11 +29,15 @@ export default function Home() {
     return null;
   }
 
+  return <RouterProvider router={router} />;
+}
+
+function Root() {
   return (
     <>
       <AppBar />
       <AppContainer className="flex-1">
-        <RouterProvider router={router} />
+        <Outlet />
       </AppContainer>
     </>
   );

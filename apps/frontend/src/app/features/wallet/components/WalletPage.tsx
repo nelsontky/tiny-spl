@@ -13,7 +13,7 @@ export const WalletPage = () => {
 
   if (typeof publicKey !== "string") {
     // TODO: check if the public key is valid
-    return redirect("/");
+    return <>{redirect("/")}</>;
   }
 
   if (mintAddress) {

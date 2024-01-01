@@ -26,7 +26,7 @@ export const MainPage = () => {
         navigate(`/${base58}`);
       }
     },
-    [base58]
+    [base58, navigate]
   );
 
   return (
