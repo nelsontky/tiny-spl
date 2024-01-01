@@ -118,6 +118,7 @@ export const buildCombineTinySplTx = async ({
     return acc;
   }, new Array<number>());
 
+  const flattenedProofPaths = proofPaths.flat();
   const ix = await tinySplProgram.methods
     .combine(
       assets.map((asset) => new BN(getAssetAmount(asset))),
@@ -148,7 +149,7 @@ export const buildCombineTinySplTx = async ({
       treeAuthority,
       treeCreatorOrDelegate: tinySplAuthority,
     })
-    .remainingAccounts(proofPaths.flat())
+    .remainingAccounts(flattenedProofPaths)
     .instruction();
 
   return buildTxsFromIxs({
