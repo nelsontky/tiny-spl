@@ -1,15 +1,17 @@
 "use client";
 
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 
 import { SolanaProviders } from "./SolanaProviders";
 import StyledComponentsRegistry from "./StyledComponentsRegistry";
 
 export const AppProviders = ({ children }: { children: React.ReactNode }) => {
   const [isServer, setIsServer] = useState(true);
+
   useEffect(() => {
     setIsServer(false);
   }, []);
+
   if (isServer) {
     return null;
   }

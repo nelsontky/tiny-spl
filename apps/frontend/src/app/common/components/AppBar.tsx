@@ -2,7 +2,6 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import dynamic from "next/dynamic";
 import { useNavigate } from "react-router-dom";
 import { AppBar as React95AppBar, Button, Toolbar } from "react95";
-import styled from "styled-components";
 
 const AppWalletMultiButton = dynamic(
   () =>
@@ -11,8 +10,6 @@ const AppWalletMultiButton = dynamic(
     ),
   { ssr: false }
 );
-
-const StyledAppWalletMultiButton = styled(AppWalletMultiButton)``;
 
 export const AppBar = () => {
   const navigate = useNavigate();
@@ -39,7 +36,7 @@ export const AppBar = () => {
               Home
             </Button>
           </div>
-          <StyledAppWalletMultiButton />
+          <AppWalletMultiButton />
         </Toolbar>
       </React95AppBar>
       <div className="min-h-[3rem]" />
