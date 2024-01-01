@@ -14,7 +14,8 @@ export const Faq = () => (
       <div className={styles.faqParagraphs}>
         <h3 className="font-bold">What does Tiny SPL do?</h3>
         <p>
-          Tiny SPL allows you to own tokens on Solana without paying for rent.
+          Tiny SPL enables ownership of Solana tokens without incurring rent
+          fees.
         </p>
         <p>
           Traditionally, token balances are stored on-chain. Keeping this data
@@ -55,12 +56,12 @@ export const Faq = () => (
           How is Tiny SPL different from normal SPL tokens?
         </h3>
         <p>
-          The main difference that we've already mentioned is that Tiny SPL
-          tokens don't require you to pay rent to own your token.
+          The primary distinction is that Tiny SPL tokens do not require rent
+          payments.
         </p>
         <p>
-          More importantly, Tiny SPL tokens are not shown in your wallet
-          balance. They can only be seen in the NFT section of your wallet.
+          Additionally, Tiny SPL tokens are not shown in your wallet balance;
+          they are visible only in the NFT section.
         </p>
         <div className="text-center">
           <img
@@ -79,23 +80,19 @@ export const Faq = () => (
           </p>
         </div>
         <p>
-          Another thing you might have noticed is that the balance of the token
-          is split up into multiple balances. This is another main difference of
-          Tiny SPL tokens, to fully manage your token balances, you will have to
-          split/combine the tokens via this website. For example, if I wanted to
-          send 1 DN to my friend, I have to split my 125 DN into 124 DN and 1
-          DN, then send the 1 DN to my friend.
-        </p>
-        <p>
-          Connect your wallet to this website and it will be very clear how you
-          can combine/split your tokens :)
+          Balances are divided into multiple parts, necessitating token
+          management through our website. For instance, to send 1 DN, you would
+          split 125 DN into 124 DN and 1 DN before transferring. Connect your
+          wallet to the website for a clearer understanding of Tiny SPL token
+          management!
         </p>
       </div>
       <div className={styles.faqParagraphs}>
         <h3 className="font-bold">More questions?</h3>
         <p>
           <Anchor href="https://twitter.com/sol_idity" target="_blank">
-            Feel free to hit me up on X (formerly Twitter), my DMs are open :)
+            Feel free to hit me up on X (formerly Twitter), my DMs are open for
+            any inquiries or assistance.
           </Anchor>
         </p>
       </div>
