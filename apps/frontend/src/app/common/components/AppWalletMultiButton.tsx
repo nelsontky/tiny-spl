@@ -67,7 +67,7 @@ export function AppWalletMultiButton({ children, ...props }: Props) {
     } else {
       return LABELS["no-wallet"];
     }
-  }, [buttonState, LABELS, publicKey]);
+  }, [children, publicKey, buttonState]);
 
   return (
     <div className="relative">
@@ -97,7 +97,7 @@ export function AppWalletMultiButton({ children, ...props }: Props) {
       </BaseWalletConnectionButton>
       <MenuList
         ref={ref}
-        className={clsx("!absolute left-0 top-full", !menuOpen && "!hidden")}
+        className={clsx("!absolute left-0 top-full !w-full", !menuOpen && "!hidden")}
       >
         {publicKey ? (
           <MenuListItem
