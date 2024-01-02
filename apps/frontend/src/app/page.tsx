@@ -1,11 +1,32 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 
 import { AppBar } from "./common/components/AppBar";
 import { AppContainer } from "./common/components/AppContainer";
+import { LoadingScreen } from "./common/components/LoadingScreen";
 import { MainPage } from "./features/homepage/components/MainPage";
-import { WalletPage } from "./features/wallet/components/WalletPage";
+
+const WalletPage = dynamic(
+  () =>
+    import("./features/wallet/components/WalletPage").then(
+      (mod) => mod.WalletPage
+    ),
+  {
+    loading: () => <LoadingScreen />,
+  }
+);
+
+const DeezNutsMintPage = dynamic(
+  () =>
+    import("./features/deez-nuts-mint/components/DeezNutsMintPage").then(
+      (mod) => mod.DeezNutsMintPage
+    ),
+  {
+    loading: () => <LoadingScreen />,
+  }
+);
 
 const router =
   typeof document !== "undefined"
@@ -15,6 +36,10 @@ const router =
           element: <Root />,
           children: [
             { index: true, element: <MainPage /> },
+            {
+              path: "/mint",
+              element: <DeezNutsMintPage />,
+            },
             {
               path: "/:publicKey",
               element: <WalletPage />,

@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Anchor, Avatar, Window, WindowContent, WindowHeader } from "react95";
 
-import { Faq } from "./Faq";
+import { Faq } from "../../../common/components/Faq";
 
 const AppWalletMultiButton = dynamic(
   () =>
@@ -66,8 +66,8 @@ export const MainPage = () => {
           </div>
           <div className="space-y-4">
             <p>
-              Tiny SPL is a new token standard that lets you own tokens without
-              worrying about rent fees.
+              Tiny SPL is a new token standard that lets you own tokens on
+              Solana without worrying about rent fees!
             </p>
             <p>
               Easily manage your Tiny SPL tokens on this site! Click below to
