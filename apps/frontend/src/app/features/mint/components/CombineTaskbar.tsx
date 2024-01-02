@@ -1,6 +1,5 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import clsx from "clsx";
-import Decimal from "decimal.js";
 import { useEffect, useState } from "react";
 import {
   AppBar,
@@ -16,7 +15,6 @@ import { ConfirmingTransaction } from "@/app/common/components/ConfirmingTransac
 import { useTinySplProgram } from "@/app/common/hooks/useTinySplProgram";
 import { useWrapperConnection } from "@/app/common/hooks/useWrapperConnection";
 import { SendTransactionResult } from "@/app/common/types/SendTransactionResult";
-import { formatAmount } from "@/app/common/utils/formatAmount";
 import { ReadApiAsset } from "@/app/common/utils/WrapperConnection";
 
 import { getAssetAmount } from "../../swr-hooks/utils/getAssetAmount";

@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import type {
   CSSProperties,
   FC,
@@ -22,7 +23,7 @@ export type AppWalletButtonProps = PropsWithChildren<{
 export const AppWalletButton: FC<AppWalletButtonProps> = (props) => {
   return (
     <Button
-      className="font-bold"
+      className={clsx("font-bold", props.className)}
       active={props.open}
       disabled={props.disabled}
       style={props.style}
