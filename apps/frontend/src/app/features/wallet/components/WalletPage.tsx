@@ -1,10 +1,18 @@
+import dynamic from "next/dynamic";
 import { redirect, useParams, useSearchParams } from "react-router-dom";
 import { Window, WindowHeader } from "react95";
 
+import { LoadingScreen } from "@/app/common/components/LoadingScreen";
 import { truncatePublicKey } from "@/app/common/utils/truncatePublicKey";
 
-import { MintPage } from "../../mint/components/MintPage";
 import { TinySplList } from "./TinySplList";
+
+const MintPage = dynamic(
+  () => import("../../mint/components/MintPage").then((mod) => mod.MintPage),
+  {
+    loading: () => <LoadingScreen />,
+  }
+);
 
 export const WalletPage = () => {
   const { publicKey } = useParams<{ publicKey: string }>();
