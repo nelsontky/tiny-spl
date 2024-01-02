@@ -76,24 +76,6 @@ async function mintTo() {
     })
     .instruction();
 
-  console.log({
-    bubblegumSigner,
-    collectionMetadata: metadata,
-    collectionMint: mint,
-    tinySplAuthority,
-    compressionProgram: COMPRESSION_PROGRAM_ID,
-    editionAccount: masterEdition,
-    logWrapper: SPL_NOOP_PROGRAM_ID,
-    merkleTree: TREE_ID,
-    mintAuthority: SIGNER.publicKey,
-    mplBubblegumProgram: BUBBLEGUM_PROGRAM_ID,
-    tokenMetadataProgram: mplTokenMetadataProgramId,
-    treeAuthority,
-    newLeafOwner: SIGNER.publicKey,
-    // treeCreatorOrDelegate: TREE_CREATOR.publicKey,
-    treeCreatorOrDelegate: tinySplAuthority,
-  });
-
   const { blockhash, lastValidBlockHeight } =
     await CONNECTION.getLatestBlockhash();
   const messageV0 = new TransactionMessage({
