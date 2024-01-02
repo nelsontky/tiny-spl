@@ -15,6 +15,7 @@
   },
   "main": "lib/index.js",
   "dependencies": {
+    "@coral-xyz/anchor": "^0.29.0",
     "@metaplex-foundation/mpl-token-metadata": "^3.1.1",
     "@metaplex-foundation/umi": "^0.8.10",
     "@metaplex-foundation/umi-bundle-defaults": "^0.8.10",

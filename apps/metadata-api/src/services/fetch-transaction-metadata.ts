@@ -1,7 +1,7 @@
-import { Connection } from "@solana/web3.js";
 import * as bs58 from "bs58";
 import type { Response } from "express";
 import type { Request } from "firebase-functions/v2/https";
+import { getConnection } from "../constants/connection";
 
 export const fetchTransactionMetadata = async (
   request: Request,
@@ -14,7 +14,7 @@ export const fetchTransactionMetadata = async (
   }
 
   try {
-    const connection = new Connection(process.env.RPC_URL!, "confirmed");
+    const connection = getConnection();
     const transaction = await connection.getTransaction(txId, {
       maxSupportedTransactionVersion: 0,
     });
