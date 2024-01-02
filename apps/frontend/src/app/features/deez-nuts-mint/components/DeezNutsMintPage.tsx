@@ -29,17 +29,17 @@ export const DeezNutsMintPage = () => {
       <Window className="w-full">
         <WindowHeader>Mint Deez Nuts</WindowHeader>
         <WindowContent>
-          <div className="flex mb-4 gap-4">
+          <div className="flex mb-4 gap-4 flex-wrap">
             <Avatar
               src="/assets/deez-nuts-logo.webp"
-              className="flex-1 max-w-[128px]"
+              className="flex-1 max-w-[128px] min-w-full sm:min-w-0"
               size={128}
               square
             />
             <div className="space-y-2 flex-1">
               <h1 className="text-xl font-bold">Deez Nuts</h1>
               <p>
-                Tiny SPL is the newest token standard on Solana, and Deez Nuts
+                Tiny SPL is a new token standard on Solana, and Deez Nuts
                 is the first token to be minted with this standard!
               </p>
               <p>
@@ -57,8 +57,8 @@ export const DeezNutsMintPage = () => {
                 containing &lt; 0.01 SOL for gas on unknown sites.
               </p>
               <Separator />
-              <div className="flex justify-between">
-                <div>
+              <div className="flex justify-between flex-wrap">
+                <div className="mb-4 min-w-full md:min-w-0">
                   <p>
                     Mint price: <span className="font-bold">FREE</span>
                   </p>

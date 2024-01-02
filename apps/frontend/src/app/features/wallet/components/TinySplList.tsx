@@ -43,6 +43,9 @@ const columns: ColumnDef<TinySplRow>[] = [
           </div>
         ),
         enableSorting: false,
+        meta: {
+          headerClassName: "w-16",
+        },
       },
     ],
   },
@@ -57,7 +60,7 @@ const columns: ColumnDef<TinySplRow>[] = [
           const collectionId = info.row.original.collectionId;
 
           return (
-            <div>
+            <div className="overflow-hidden text-ellipsis">
               <div>{collectionName ?? ""}</div>
               <Anchor
                 className="!text-sm"
@@ -91,7 +94,7 @@ const columns: ColumnDef<TinySplRow>[] = [
           const formattedAmount = formatAmount(amount);
 
           return (
-            <div>
+            <div className="text-wrap break-all	leading-tight">
               {formattedAmount} {symbol}
             </div>
           );
@@ -128,6 +131,10 @@ export const TinySplList = () => {
               key={header.id}
               disabled={!header.column.getCanSort()}
               onClick={header.column.getToggleSortingHandler()}
+              className={
+                (header.getContext().column.columnDef.meta as any)
+                  ?.headerClassName
+              }
             >
               <div className="flex justify-between items-center">
                 {flexRender(
@@ -173,7 +180,7 @@ export const TinySplList = () => {
   }
 
   return (
-    <Table className="h-[1px]">
+    <Table className="h-[1px] table-fixed">
       {tableHead}
       <TableBody>
         {table.getRowModel().rows.map((row) => {

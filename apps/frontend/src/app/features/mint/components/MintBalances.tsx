@@ -7,6 +7,7 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
+import clsx from "clsx";
 import Decimal from "decimal.js";
 import { useEffect, useState } from "react";
 import {
@@ -43,7 +44,7 @@ const columns: ColumnDef<ReadApiAsset>[] = [
         accessorKey: "id",
         cell: (info) => (
           <Anchor
-            className="break-all"
+            className="overflow-hidden overflow-ellipsis whitespace-nowrap"
             href={generateXrayCollectionLink(info.getValue() ?? "")}
             target="_blank"
           >
@@ -54,6 +55,10 @@ const columns: ColumnDef<ReadApiAsset>[] = [
           (a.original.id ?? "")
             .toLowerCase()
             .localeCompare((b.original.id ?? "").toLowerCase()),
+        meta: {
+          dataClassName: "hidden sm:table-cell overflow-hidden text-ellipsis",
+          headerClassName: "!hidden sm:!table-cell",
+        },
       },
     ],
   },
@@ -155,7 +160,7 @@ export const MintBalances = ({
           className="text-black"
           text={
             balances.length < 2
-              ? "You must have more than 1 balance to combine"
+              ? "You must have more than one balance to combine"
               : `You can only combine ${MAX_MINTS_TO_COMBINE} balances at a time`
           }
           enterDelay={0}
@@ -186,11 +191,11 @@ export const MintBalances = ({
           />
         </>
       )}
-      <Table className="h-[1px]">
+      <Table className="h-[1px] table-fixed">
         <TableHead>
           <TableRow>
             {isConnectedWalletOwner && (
-              <TableHeadCell disabled className="flex items-center">
+              <TableHeadCell disabled className="flex items-center w-28">
                 Combine <CombineAndSplitHelp />
               </TableHeadCell>
             )}
@@ -200,6 +205,9 @@ export const MintBalances = ({
                   key={header.id}
                   disabled={!header.column.getCanSort()}
                   onClick={header.column.getToggleSortingHandler()}
+                  className={
+                    (header.column.columnDef.meta as any)?.headerClassName
+                  }
                 >
                   <div className="flex justify-between items-center">
                     {flexRender(
@@ -215,7 +223,7 @@ export const MintBalances = ({
               );
             })}
             {isConnectedWalletOwner && (
-              <TableHeadCell disabled className="flex items-center">
+              <TableHeadCell disabled className="flex items-center w-24">
                 Split <CombineAndSplitHelp />
               </TableHeadCell>
             )}
@@ -251,7 +259,12 @@ export const MintBalances = ({
                 )}
                 {row.getVisibleCells().map((cell) => {
                   return (
-                    <TableDataCell key={cell.id}>
+                    <TableDataCell
+                      key={cell.id}
+                      className={
+                        (cell.column.columnDef.meta as any)?.dataClassName
+                      }
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
