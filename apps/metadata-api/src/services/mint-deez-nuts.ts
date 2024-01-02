@@ -39,14 +39,19 @@ export const mintDeezNuts = async (
     }
 
     const amount = crypto.randomInt(100, 1001);
+    const { blockhash, lastValidBlockHeight } =
+      await getConnection().getLatestBlockhash();
     const serializedTransaction = await buildMintToTransaction(
       body.publicKey,
-      amount
+      amount,
+      blockhash
     );
 
     response.send({
       amount,
       transaction: serializedTransaction,
+      blockhash,
+      lastValidBlockHeight,
     });
   } catch {
     response
@@ -57,15 +62,17 @@ export const mintDeezNuts = async (
 
 async function verifyHCaptchaToken(token: string) {
   try {
+    const form = new FormData();
+    form.append("secret", process.env.HCAPTCHA_SECRET_KEY!);
+    form.append("response", token);
+
     const response = await fetch("https://api.hcaptcha.com/siteverify", {
-      body: JSON.stringify({
-        secret: process.env.HCAPTCHA_SECRET,
-        response: token,
-      }),
+      method: "POST",
+      body: form,
     });
     const json = await response.json();
     return json.success;
-  } catch {
+  } catch (e) {
     return false;
   }
 }
@@ -74,7 +81,11 @@ const DEEZ_NUTS_AUTHORITY = Keypair.fromSecretKey(
   Uint8Array.from(JSON.parse(process.env.DEEZ_NUTS_AUTHORITY!))
 );
 
-async function buildMintToTransaction(publicKey: string, amount: number) {
+async function buildMintToTransaction(
+  publicKey: string,
+  amount: number,
+  blockhash: string
+) {
   const program = getProgram();
   const ix = await program.methods
     .mintTo(new BN(amount))
@@ -96,7 +107,6 @@ async function buildMintToTransaction(publicKey: string, amount: number) {
     })
     .instruction();
 
-  const { blockhash } = await getConnection().getLatestBlockhash();
   const messageV0 = new TransactionMessage({
     payerKey: new PublicKey(publicKey),
     recentBlockhash: blockhash,
