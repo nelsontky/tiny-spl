@@ -1,6 +1,6 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import dynamic from "next/dynamic";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AppBar as React95AppBar, Button, Toolbar } from "react95";
 
 const AppWalletMultiButton = dynamic(
@@ -36,7 +36,7 @@ export const AppBar = () => {
               Home
             </Button>
             <Button
-              className="font-bold"
+              className="font-bold !hidden sm:inline-block"
               as="a"
               // destructured to overcome typecheck
               {...{
@@ -46,6 +46,16 @@ export const AppBar = () => {
               }}
             >
               GitHub
+            </Button>
+            <Button
+              className="font-bold text-nowrap overflow-hidden text-ellipsis"
+              as={Link}
+              // destructured to overcome typecheck
+              {...{
+                to: "/mint",
+              }}
+            >
+              Get tokens
             </Button>
           </div>
           <AppWalletMultiButton />
