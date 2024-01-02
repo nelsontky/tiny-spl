@@ -1,4 +1,6 @@
-import { publicKey } from "@coral-xyz/anchor/dist/cjs/utils";
+import { useWallet } from "@solana/wallet-adapter-react";
+import clsx from "clsx";
+import { useMemo } from "react";
 import {
   Anchor,
   Avatar,
@@ -9,9 +11,19 @@ import {
 } from "react95";
 
 import { Faq } from "../../../common/components/Faq";
+import { useTinySplsByOwner } from "../../swr-hooks/hooks/useTinySplsByOwner";
 import { MintButton } from "./MintButton";
 
+const COLLECTION_ID = "DEEZyno8D9RCCghEWkTNarZrCW7HvvWE9z64tiqvQKpH";
+
 export const DeezNutsMintPage = () => {
+  const { publicKey } = useWallet();
+  const { data, mutate } = useTinySplsByOwner(publicKey?.toBase58());
+  const deezNutsBalance = useMemo(
+    () => data?.find((asset) => asset.collectionId === COLLECTION_ID),
+    [data]
+  );
+
   return (
     <div className="py-12 space-y-8">
       <Window className="w-full">
@@ -48,13 +60,18 @@ export const DeezNutsMintPage = () => {
               <div className="flex justify-between">
                 <div>
                   <p>
-                    Wallet balance: <span className="font-bold">{69} DN</span>
-                  </p>
-                  <p>
                     Mint price: <span className="font-bold">FREE</span>
                   </p>
+                  <p className={clsx("invisible", publicKey && "!visible")}>
+                    Wallet balance:{" "}
+                    <span className="font-bold">
+                      {!data
+                        ? "Loading..."
+                        : (deezNutsBalance?.amount ?? 0) + " DN"}
+                    </span>
+                  </p>
                 </div>
-                <MintButton />
+                <MintButton mutate={mutate} />
               </div>
             </div>
           </div>

@@ -24,6 +24,10 @@
       {
         "source": "/collection",
         "function": "collection"
+      },
+      {
+        "source": "/mint",
+        "function": "mint"
       }
     ]
   }
