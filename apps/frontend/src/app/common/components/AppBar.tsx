@@ -47,7 +47,7 @@ export const AppBar = () => {
             >
               GitHub
             </Button>
-            <Button
+            {/* <Button
               className="font-bold text-nowrap overflow-hidden text-ellipsis"
               as={Link}
               // destructured to overcome typecheck
@@ -56,7 +56,7 @@ export const AppBar = () => {
               }}
             >
               Get tokens
-            </Button>
+            </Button> */}
           </div>
           <AppWalletMultiButton />
         </Toolbar>

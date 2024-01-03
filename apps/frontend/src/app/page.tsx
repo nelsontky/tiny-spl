@@ -36,10 +36,10 @@ const router =
           element: <Root />,
           children: [
             { index: true, element: <MainPage /> },
-            {
-              path: "/mint",
-              element: <DeezNutsMintPage />,
-            },
+            // {
+            //   path: "/mint",
+            //   element: <DeezNutsMintPage />,
+            // },
             {
               path: "/:publicKey",
               element: <WalletPage />,
