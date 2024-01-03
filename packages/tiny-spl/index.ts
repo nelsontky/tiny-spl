@@ -6,4 +6,5 @@ const PROGRAM_ID = new PublicKey("tsP1jf31M3iGNPmANP3ep3iWCMTxpMFLNbewWVWWbSo");
 
 const TINY_SPL_AUTHORITY_SEED = "tiny_spl";
 
-export { idl, PROGRAM_ID, TinySpl, TINY_SPL_AUTHORITY_SEED };
+export type { TinySpl };
+export { idl, PROGRAM_ID, TINY_SPL_AUTHORITY_SEED };
