@@ -226,6 +226,12 @@ export type TinySpl = {
         {
           "name": "amount",
           "type": "u64"
+        },
+        {
+          "name": "maxSupply",
+          "type": {
+            "option": "u64"
+          }
         }
       ]
     },
@@ -589,6 +595,11 @@ export type TinySpl = {
       "code": 6008,
       "name": "InvalidCombineParameters",
       "msg": "Different number of parameters supplied for combining"
+    },
+    {
+      "code": 6009,
+      "name": "ExceededMaxMintSupply",
+      "msg": "Exceeded max mint supply"
     }
   ]
 };
@@ -821,6 +832,12 @@ export const IDL: TinySpl = {
         {
           "name": "amount",
           "type": "u64"
+        },
+        {
+          "name": "maxSupply",
+          "type": {
+            "option": "u64"
+          }
         }
       ]
     },
@@ -1184,6 +1201,11 @@ export const IDL: TinySpl = {
       "code": 6008,
       "name": "InvalidCombineParameters",
       "msg": "Different number of parameters supplied for combining"
+    },
+    {
+      "code": 6009,
+      "name": "ExceededMaxMintSupply",
+      "msg": "Exceeded max mint supply"
     }
   ]
 };

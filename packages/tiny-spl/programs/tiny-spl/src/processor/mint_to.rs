@@ -3,12 +3,13 @@ use anchor_spl::metadata::{mpl_token_metadata, Metadata};
 
 use crate::{
     constants::TINY_SPL_AUTHORITY_SEED,
+    error::TinySplError,
     program_wrappers::{MplBubblegum, Noop, SplCompression},
     state::TinySplAuthority,
     utils::{get_tiny_spl_metadata, mint_tiny_spl_to_collection, MintTinySplToCollection},
 };
 
-pub fn mint_to(ctx: Context<MintTo>, amount: u64) -> Result<()> {
+pub fn mint_to(ctx: Context<MintTo>, amount: u64, max_supply: Option<u64>) -> Result<()> {
     let collection_metadata = mpl_token_metadata::accounts::Metadata::safe_deserialize(
         ctx.accounts
             .collection_metadata
@@ -60,6 +61,16 @@ pub fn mint_to(ctx: Context<MintTo>, amount: u64) -> Result<()> {
         .current_supply
         .checked_add(amount)
         .unwrap();
+
+    match max_supply {
+        Some(max_supply) => {
+            require!(
+                tiny_spl_authority.current_supply <= max_supply,
+                TinySplError::ExceededMaxMintSupply
+            )
+        }
+        None => (),
+    }
 
     Ok(())
 }

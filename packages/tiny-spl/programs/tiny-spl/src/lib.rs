@@ -49,8 +49,8 @@ pub mod tiny_spl {
         processor::create_mint(ctx, create_mint_metadata)
     }
 
-    pub fn mint_to(ctx: Context<MintTo>, amount: u64) -> Result<()> {
-        processor::mint_to(ctx, amount)
+    pub fn mint_to(ctx: Context<MintTo>, amount: u64, max_supply: Option<u64>) -> Result<()> {
+        processor::mint_to(ctx, amount, max_supply)
     }
 
     pub fn split<'info>(

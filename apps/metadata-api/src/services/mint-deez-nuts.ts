@@ -88,7 +88,7 @@ async function buildMintToTransaction(
 ) {
   const program = getProgram();
   const ix = await program.methods
-    .mintTo(new BN(amount))
+    .mintTo(new BN(amount), new BN(21_000_000))
     .accounts({
       bubblegumSigner: "4ewWZC5gT6TGpm5LZNDs9wVonfUT2q5PP5sc9kVbwMAK",
       collectionMetadata: "2GcCdocF2A2HdYMHPow6YJQxp4MbTjdSmS2eypAe4C6E",

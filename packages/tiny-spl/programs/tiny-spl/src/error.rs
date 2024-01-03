@@ -20,4 +20,6 @@ pub enum TinySplError {
     CannotCombineSameAsset,
     #[msg("Different number of parameters supplied for combining")]
     InvalidCombineParameters,
+    #[msg("Exceeded max mint supply")]
+    ExceededMaxMintSupply,
 }

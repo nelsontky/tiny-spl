@@ -106,7 +106,7 @@ describe("tiny-spl", () => {
     ).currentSupply;
 
     const ix = await PROGRAM.methods
-      .mintTo(MINT_COUNT)
+      .mintTo(MINT_COUNT, new anchor.BN(21_000_000))
       .accounts({
         bubblegumSigner,
         collectionMetadata: metadata,

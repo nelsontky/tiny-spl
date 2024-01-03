@@ -231,6 +231,12 @@ const idl = {
           name: "amount",
           type: "u64",
         },
+        {
+          name: "maxSupply",
+          type: {
+            option: "u64",
+          },
+        },
       ],
     },
     {
@@ -588,6 +594,11 @@ const idl = {
       name: "InvalidCombineParameters",
       msg: "Different number of parameters supplied for combining",
     },
+    {
+      code: 6009,
+      name: "ExceededMaxMintSupply",
+      msg: "Exceeded max mint supply",
+    },
   ],
   metadata: {
     address: "tsP1jf31M3iGNPmANP3ep3iWCMTxpMFLNbewWVWWbSo",
@@ -822,6 +833,12 @@ type TinySpl = {
         {
           name: "amount";
           type: "u64";
+        },
+        {
+          name: "maxSupply";
+          type: {
+            option: "u64";
+          };
         },
       ];
     },
@@ -1179,6 +1196,11 @@ type TinySpl = {
       code: 6008;
       name: "InvalidCombineParameters";
       msg: "Different number of parameters supplied for combining";
+    },
+    {
+      code: 6009;
+      name: "ExceededMaxMintSupply";
+      msg: "Exceeded max mint supply";
     },
   ];
 };
