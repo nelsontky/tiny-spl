@@ -24,7 +24,7 @@ import {
 } from "@/app/common/utils/WrapperConnection";
 
 import { getAssetCollectionId } from "../../swr-hooks/utils/getAssetCollectionId";
-import { NEW_TREE_ADDRESS } from "../constants/newTreeAddress";
+import { NEW_TREE_ADDRESS } from "../constants/treeAddresses";
 
 export const buildSplitTinySplTx = async ({
   asset,
