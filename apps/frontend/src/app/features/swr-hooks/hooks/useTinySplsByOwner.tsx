@@ -5,8 +5,8 @@ import useSWRImmutable from "swr/immutable";
 
 import { useWrapperConnection } from "@/app/common/hooks/useWrapperConnection";
 import {
-  GetAssetsByOwnerRpcInput,
   ReadApiAsset,
+  SearchAssetsRpcInput,
 } from "@/app/common/utils/WrapperConnection";
 
 import { TinySplRow } from "../types/TinySplRow";
@@ -14,7 +14,7 @@ import { filterTinySpls } from "../utils/filterTinySpls";
 import { getAssetAmount } from "../utils/getAssetAmount";
 import { getAssetCollectionId } from "../utils/getAssetCollectionId";
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 20;
 
 const useTinySplListByOwner = (owner: string | undefined) => {
   const wrapperConnection = useWrapperConnection();
@@ -26,16 +26,26 @@ const useTinySplListByOwner = (owner: string | undefined) => {
       let currentPage = 1;
       // eslint-disable-next-line no-constant-condition
       while (true) {
-        const assetsByOwnerRpcInput: GetAssetsByOwnerRpcInput = {
+        // const assetsByOwnerRpcInput: GetAssetsByOwnerRpcInput = {
+        //   ownerAddress: owner,
+        //   limit: PAGE_SIZE,
+        //   page: currentPage,
+        //   displayOptions: {
+        //     showCollectionMetadata: false,
+        //   },
+        // };
+        const assetsByOwnerRpcInput: SearchAssetsRpcInput = {
           ownerAddress: owner,
           limit: PAGE_SIZE,
           page: currentPage,
-          displayOptions: {
-            showCollectionMetadata: false,
-          },
+          grouping: [
+            "collection",
+            "DEEZyno8D9RCCghEWkTNarZrCW7HvvWE9z64tiqvQKpH",
+          ],
+          compressed: true,
         };
 
-        const assetsByOwner = await wrapperConnection.getAssetsByOwner(
+        const assetsByOwner = await wrapperConnection.searchAssets(
           assetsByOwnerRpcInput
         );
 

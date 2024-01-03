@@ -93,8 +93,9 @@ export const MintButton = ({ mutate }: { mutate: () => Promise<any> }) => {
         setError={setError}
       />
       <div className="flex flex-col items-end">
-        <Button disabled={loading} onClick={onSubmit} className={styles.button}>
-          {loading ? "Loading..." : "Mint now!"}
+        <Button disabled onClick={onSubmit} className={styles.button}>
+          Mint ended
+          {/* {loading ? "Loading..." : "Mint now!"} */}
         </Button>
         {error && <p className="text-sm text-red-500">{error}</p>}
       </div>
