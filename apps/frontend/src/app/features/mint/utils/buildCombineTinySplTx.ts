@@ -25,6 +25,7 @@ import {
 
 import { getAssetAmount } from "../../swr-hooks/utils/getAssetAmount";
 import { getAssetCollectionId } from "../../swr-hooks/utils/getAssetCollectionId";
+import { NEW_TREE_ADDRESS } from "../constants/newTreeAddress";
 
 export const buildCombineTinySplTx = async ({
   assets,
@@ -79,8 +80,12 @@ export const buildCombineTinySplTx = async ({
     tinySplProgram.programId
   );
 
-  const [treeAuthority] = PublicKey.findProgramAddressSync(
+  const [sourceTreeAuthority] = PublicKey.findProgramAddressSync(
     [new PublicKey(firstAsset.compression.tree).toBuffer()],
+    BUBBLEGUM_PROGRAM_ID
+  );
+  const [destinationTreeAuthority] = PublicKey.findProgramAddressSync(
+    [NEW_TREE_ADDRESS.toBuffer()],
     BUBBLEGUM_PROGRAM_ID
   );
 
@@ -136,7 +141,8 @@ export const buildCombineTinySplTx = async ({
       compressionProgram: COMPRESSION_PROGRAM_ID,
       collectionMint: collectionId,
       tinySplAuthority,
-      merkleTree: firstAssetProof.tree_id,
+      sourceMerkleTree: firstAssetProof.tree_id,
+      destinationMerkleTree: NEW_TREE_ADDRESS,
       systemProgram: SystemProgram.programId,
       authority: signer,
       bubblegumSigner: BUBBLEGUM_SIGNER,
@@ -146,7 +152,8 @@ export const buildCombineTinySplTx = async ({
       mplBubblegumProgram: BUBBLEGUM_PROGRAM_ID,
       newLeafOwner: signer,
       tokenMetadataProgram: MPL_TOKEN_METADATA_PROGRAM_ID,
-      treeAuthority,
+      sourceTreeAuthority,
+      destinationTreeAuthority,
       treeCreatorOrDelegate: tinySplAuthority,
     })
     .remainingAccounts(flattenedProofPaths)
@@ -164,5 +171,8 @@ export const buildCombineTinySplTx = async ({
       ix,
     ],
     payer: signer,
+    lookupTableAddress: new PublicKey(
+      "Cg9fZtcBxxw8eobV4uvmQMYdkdxfex5zibR1QELnuoKp"
+    ),
   });
 };

@@ -289,12 +289,22 @@
           "isSigner": false
         },
         {
-          "name": "treeAuthority",
+          "name": "sourceTreeAuthority",
           "isMut": true,
           "isSigner": false
         },
         {
-          "name": "merkleTree",
+          "name": "destinationTreeAuthority",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "sourceMerkleTree",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "destinationMerkleTree",
           "isMut": true,
           "isSigner": false
         },
@@ -412,12 +422,22 @@
           "isSigner": false
         },
         {
-          "name": "treeAuthority",
+          "name": "sourceTreeAuthority",
           "isMut": true,
           "isSigner": false
         },
         {
-          "name": "merkleTree",
+          "name": "destinationTreeAuthority",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "sourceMerkleTree",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "destinationMerkleTree",
           "isMut": true,
           "isSigner": false
         },

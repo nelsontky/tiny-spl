@@ -289,12 +289,22 @@ export type TinySpl = {
           "isSigner": false
         },
         {
-          "name": "treeAuthority",
+          "name": "sourceTreeAuthority",
           "isMut": true,
           "isSigner": false
         },
         {
-          "name": "merkleTree",
+          "name": "destinationTreeAuthority",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "sourceMerkleTree",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "destinationMerkleTree",
           "isMut": true,
           "isSigner": false
         },
@@ -412,12 +422,22 @@ export type TinySpl = {
           "isSigner": false
         },
         {
-          "name": "treeAuthority",
+          "name": "sourceTreeAuthority",
           "isMut": true,
           "isSigner": false
         },
         {
-          "name": "merkleTree",
+          "name": "destinationTreeAuthority",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "sourceMerkleTree",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "destinationMerkleTree",
           "isMut": true,
           "isSigner": false
         },
@@ -895,12 +915,22 @@ export const IDL: TinySpl = {
           "isSigner": false
         },
         {
-          "name": "treeAuthority",
+          "name": "sourceTreeAuthority",
           "isMut": true,
           "isSigner": false
         },
         {
-          "name": "merkleTree",
+          "name": "destinationTreeAuthority",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "sourceMerkleTree",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "destinationMerkleTree",
           "isMut": true,
           "isSigner": false
         },
@@ -1018,12 +1048,22 @@ export const IDL: TinySpl = {
           "isSigner": false
         },
         {
-          "name": "treeAuthority",
+          "name": "sourceTreeAuthority",
           "isMut": true,
           "isSigner": false
         },
         {
-          "name": "merkleTree",
+          "name": "destinationTreeAuthority",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "sourceMerkleTree",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "destinationMerkleTree",
           "isMut": true,
           "isSigner": false
         },

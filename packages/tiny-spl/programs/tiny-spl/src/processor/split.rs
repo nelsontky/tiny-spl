@@ -43,7 +43,7 @@ pub fn split<'info>(
         &cnft_metadata,
         nonce,
         index,
-        &ctx.accounts.merkle_tree.to_account_info(),
+        &ctx.accounts.source_merkle_tree.to_account_info(),
         &ctx.accounts.leaf_owner.to_account_info(),
         &ctx.accounts.leaf_delegate.to_account_info(),
         &ctx.accounts.collection_mint.to_account_info(),
@@ -58,10 +58,10 @@ pub fn split<'info>(
     let burn_cpi_context = CpiContext::new(
         ctx.accounts.mpl_bubblegum_program.to_account_info(),
         BurnCnft {
-            tree_authority: ctx.accounts.tree_authority.to_account_info(),
+            tree_authority: ctx.accounts.source_tree_authority.to_account_info(),
             leaf_owner: ctx.accounts.leaf_owner.to_account_info(),
             leaf_delegate: ctx.accounts.leaf_delegate.to_account_info(),
-            merkle_tree: ctx.accounts.merkle_tree.to_account_info(),
+            merkle_tree: ctx.accounts.source_merkle_tree.to_account_info(),
             log_wrapper: ctx.accounts.log_wrapper.to_account_info(),
             compression_program: ctx.accounts.compression_program.to_account_info(),
             system_program: ctx.accounts.system_program.to_account_info(),
@@ -86,9 +86,9 @@ pub fn split<'info>(
     let mint_cpi_context = CpiContext::new_with_signer(
         ctx.accounts.mpl_bubblegum_program.to_account_info(),
         MintTinySplToCollection {
-            tree_config: ctx.accounts.tree_authority.to_account_info(),
+            tree_config: ctx.accounts.destination_tree_authority.to_account_info(),
             new_leaf_owner: ctx.accounts.new_leaf_owner.to_account_info(),
-            merkle_tree: ctx.accounts.merkle_tree.to_account_info(),
+            merkle_tree: ctx.accounts.destination_merkle_tree.to_account_info(),
             payer: ctx.accounts.authority.to_account_info(),
             tree_creator_or_delegate: ctx.accounts.tree_creator_or_delegate.to_account_info(),
             collection_mint: ctx.accounts.collection_mint.to_account_info(),
@@ -153,10 +153,16 @@ pub struct Split<'info> {
     pub tiny_spl_authority: Box<Account<'info, TinySplAuthority>>,
     #[account(mut)]
     /// CHECK: checked in cpi to bubblegum
-    pub tree_authority: UncheckedAccount<'info>,
+    pub source_tree_authority: UncheckedAccount<'info>,
+    #[account(mut)]
+    /// CHECK: checked in cpi to bubblegum
+    pub destination_tree_authority: UncheckedAccount<'info>,
     /// CHECK: This account is checked in cpi
     #[account(mut)]
-    pub merkle_tree: UncheckedAccount<'info>,
+    pub source_merkle_tree: UncheckedAccount<'info>,
+    /// CHECK: This account is checked in cpi
+    #[account(mut)]
+    pub destination_merkle_tree: UncheckedAccount<'info>,
     pub log_wrapper: Program<'info, Noop>,
     pub compression_program: Program<'info, SplCompression>,
     pub token_metadata_program: Program<'info, Metadata>,
