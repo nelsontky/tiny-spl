@@ -6,22 +6,13 @@ import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import { AppBar } from "./common/components/AppBar";
 import { AppContainer } from "./common/components/AppContainer";
 import { LoadingScreen } from "./common/components/LoadingScreen";
+import { DeezNutsMintPage } from "./features/deez-nuts-mint/components/DeezNutsMintPage";
 import { MainPage } from "./features/homepage/components/MainPage";
 
 const WalletPage = dynamic(
   () =>
     import("./features/wallet/components/WalletPage").then(
       (mod) => mod.WalletPage
-    ),
-  {
-    loading: () => <LoadingScreen />,
-  }
-);
-
-const DeezNutsMintPage = dynamic(
-  () =>
-    import("./features/deez-nuts-mint/components/DeezNutsMintPage").then(
-      (mod) => mod.DeezNutsMintPage
     ),
   {
     loading: () => <LoadingScreen />,
@@ -36,10 +27,10 @@ const router =
           element: <Root />,
           children: [
             { index: true, element: <MainPage /> },
-            // {
-            //   path: "/mint",
-            //   element: <DeezNutsMintPage />,
-            // },
+            {
+              path: "/mint",
+              element: <DeezNutsMintPage />,
+            },
             {
               path: "/:publicKey",
               element: <WalletPage />,
