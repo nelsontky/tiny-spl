@@ -288,6 +288,40 @@ export class WrapperConnection extends Connection {
 
     return result;
   }
+
+  async searchAssets(
+    { ownerAddress, page, limit, grouping, compressed }: SearchAssetsRpcInput,
+    axiosRequestConfig?: AxiosRequestConfig
+  ): Promise<ReadApiAssetList> {
+    // // `page` cannot be supplied with `before` or `after`
+    // if (typeof page == "number" && (before || after))
+    //   throw new ReadApiError(
+    //     "Pagination Error. Only one pagination parameter supported per query."
+    //   );
+
+    // // a pagination method MUST be selected, but we are defaulting to using `page=0`
+
+    const { result } = await this.callReadApi<
+      SearchAssetsRpcInput,
+      ReadApiAssetList
+    >(
+      {
+        method: "searchAssets",
+        params: {
+          ownerAddress,
+          limit: limit ?? null,
+          page: page ?? 1,
+          grouping: grouping ?? null,
+          compressed,
+        },
+      },
+      axiosRequestConfig
+    );
+
+    if (!result) throw new ReadApiError("No results returned");
+
+    return result;
+  }
 }
 
 /*
@@ -399,6 +433,14 @@ export type GetAssetsByGroupRpcInput = {
   /* assetId to search after */
   after?: Option<string>;
   sortBy?: Option<ReadApiParamAssetSortBy>;
+};
+
+export type SearchAssetsRpcInput = {
+  ownerAddress: string;
+  grouping: string[];
+  page: number;
+  limit: number;
+  compressed: boolean;
 };
 
 export type GetAssetsByOwnerRpcInput = {

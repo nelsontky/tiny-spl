@@ -10,19 +10,24 @@ import {
   WindowHeader,
 } from "react95";
 
+import { formatAmount } from "@/app/common/utils/formatAmount";
+
 import { Faq } from "../../../common/components/Faq";
 import { useTinySplsByOwner } from "../../swr-hooks/hooks/useTinySplsByOwner";
+import { useMintedSupply } from "../hooks/useMintedSupply";
 import { MintButton } from "./MintButton";
 
 const COLLECTION_ID = "DEEZyno8D9RCCghEWkTNarZrCW7HvvWE9z64tiqvQKpH";
 
 export const DeezNutsMintPage = () => {
   const { publicKey } = useWallet();
-  const { data, mutate } = useTinySplsByOwner(publicKey?.toBase58());
-  const deezNutsBalance = useMemo(
-    () => data?.find((asset) => asset.collectionId === COLLECTION_ID),
-    [data]
-  );
+  // const { data, mutate } = useTinySplsByOwner(publicKey?.toBase58());
+  // const deezNutsBalance = useMemo(
+  //   () => data?.find((asset) => asset.collectionId === COLLECTION_ID),
+  //   [data]
+  // );
+
+  const { data, mutate } = useMintedSupply(COLLECTION_ID);
 
   return (
     <div className="py-12 space-y-8">
@@ -39,12 +44,13 @@ export const DeezNutsMintPage = () => {
             <div className="space-y-2 flex-1">
               <h1 className="text-xl font-bold">Deez Nuts</h1>
               <p>
-                Tiny SPL is a new token standard on Solana, and Deez Nuts
-                is the first token to be minted with this standard!
+                Tiny SPL is a new token standard on Solana, and Deez Nuts is the
+                first token to be minted with this standard!
               </p>
               <p>
                 Each mint attempt will mint you a random amount of tokens
-                between 100 and 1000. There are no wallet limits, so mint away!
+                between 100 and 1000, and there is a max supply cap of
+                21,000,000 tokens, so fastest fingers first!
               </p>
               <p className="italic">
                 For security, use a{" "}
@@ -62,14 +68,13 @@ export const DeezNutsMintPage = () => {
                   <p>
                     Mint price: <span className="font-bold">FREE</span>
                   </p>
-                  <p className={clsx("invisible", publicKey && "!visible")}>
-                    Wallet balance:{" "}
-                    <span className="font-bold">
-                      {!data
-                        ? "Loading..."
-                        : (deezNutsBalance?.amount ?? 0) + " DN"}
-                    </span>
+                  <p>
+                    Tokens minted: 21,000,000
+                    {/* {!data
+                      ? "Loading..."
+                      : formatAmount(data.toString()) + " DN"} */}
                   </p>
+                  <p>Max supply: 21,000,000</p>
                 </div>
                 <MintButton mutate={mutate} />
               </div>
