@@ -422,17 +422,7 @@ export type TinySpl = {
           "isSigner": false
         },
         {
-          "name": "sourceTreeAuthority",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "destinationTreeAuthority",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "sourceMerkleTree",
           "isMut": true,
           "isSigner": false
         },
@@ -1048,17 +1038,7 @@ export const IDL: TinySpl = {
           "isSigner": false
         },
         {
-          "name": "sourceTreeAuthority",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "destinationTreeAuthority",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "sourceMerkleTree",
           "isMut": true,
           "isSigner": false
         },

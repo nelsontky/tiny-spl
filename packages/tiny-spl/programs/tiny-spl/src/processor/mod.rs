@@ -6,7 +6,6 @@ mod log_metadata;
 mod close_metadata_account;
 mod split;
 mod combine;
-mod update_merkle_tree;
 
 pub use create_mint::*;
 pub use upload_logging_metadata::*;
@@ -16,4 +15,3 @@ pub use log_metadata::*;
 pub use close_metadata_account::*;
 pub use split::*;
 pub use combine::*;
-pub use update_merkle_tree::*;
