@@ -8,10 +8,10 @@ pub fn verify_token_splits(source_amount: u64, amounts: &Vec<u64>) -> Result<()>
         total_amount = total_amount.checked_add(*amount).unwrap();
     }
 
-    let is_amounts_all_more_than_hundred = amounts.iter().all(|&amount| amount >= 100);
+    let is_amounts_all_more_than_zero = amounts.iter().all(|&amount| amount > 0);
 
     require!(
-        source_amount == total_amount && is_amounts_all_more_than_hundred,
+        source_amount == total_amount && is_amounts_all_more_than_zero,
         TinySplError::InvalidSplitAmounts
     );
 
