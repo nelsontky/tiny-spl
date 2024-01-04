@@ -41,13 +41,13 @@ pub fn combine<'info>(
         TinySplError::CannotCombineSameAsset
     );
 
-    let burn_cpi_context = CpiContext::new(
+    let mut burn_cpi_context = CpiContext::new(
         ctx.accounts.mpl_bubblegum_program.to_account_info(),
         BurnCnft {
-            tree_authority: ctx.accounts.source_tree_authority.to_account_info(),
+            tree_authority: ctx.accounts.destination_tree_authority.to_account_info(),
             leaf_owner: ctx.accounts.leaf_owner.to_account_info(),
             leaf_delegate: ctx.accounts.leaf_delegate.to_account_info(),
-            merkle_tree: ctx.accounts.source_merkle_tree.to_account_info(),
+            merkle_tree: ctx.accounts.destination_merkle_tree.to_account_info(),
             log_wrapper: ctx.accounts.log_wrapper.to_account_info(),
             compression_program: ctx.accounts.compression_program.to_account_info(),
             system_program: ctx.accounts.system_program.to_account_info(),
@@ -63,16 +63,31 @@ pub fn combine<'info>(
             .as_ref(),
     )?;
     for (i, asset_id) in asset_ids.iter().enumerate() {
+        let merkle_tree_count: usize = asset_ids.len();
+        let merkle_tree = &ctx.remaining_accounts[i];
+        let tree_authority = &ctx.remaining_accounts[merkle_tree_count + i];
+
+        let proof_path_offset: u32 = merkle_tree_count
+            .checked_mul(2)
+            .unwrap()
+            .try_into()
+            .unwrap();
+        let proof_path_end_index_exclusive = proof_path_offset
+            .checked_add(proof_path_end_indexes_exclusive[i])
+            .unwrap();
+        let proof_path_start_index = if i == 0 {
+            proof_path_offset
+        } else {
+            proof_path_offset
+                .checked_add(proof_path_end_indexes_exclusive[i - 1])
+                .unwrap()
+        };
+
         let amount = amounts[i];
         let root = roots[i];
         let nonce = nonces[i];
         let index = indexes[i];
-        let proof_path_end_index_exclusive = proof_path_end_indexes_exclusive[i];
-        let proof_path_start_index = if i == 0 {
-            0
-        } else {
-            proof_path_end_indexes_exclusive[i - 1]
-        };
+
         let remaining_accounts = &ctx.remaining_accounts[proof_path_start_index.try_into().unwrap()
             ..proof_path_end_index_exclusive.try_into().unwrap()];
 
@@ -88,7 +103,7 @@ pub fn combine<'info>(
             &cnft_metadata,
             nonce,
             index,
-            &ctx.accounts.source_merkle_tree.to_account_info(),
+            merkle_tree,
             &ctx.accounts.leaf_owner.to_account_info(),
             &ctx.accounts.leaf_delegate.to_account_info(),
             &ctx.accounts.collection_mint.to_account_info(),
@@ -100,6 +115,9 @@ pub fn combine<'info>(
             calculated_asset_id == *asset_id,
             TinySplError::AssetIdMismatch
         );
+
+        burn_cpi_context.accounts.merkle_tree = merkle_tree.clone();
+        burn_cpi_context.accounts.tree_authority = tree_authority.clone();
 
         burn_cnft(
             &burn_cpi_context,
@@ -193,13 +211,7 @@ pub struct Combine<'info> {
     pub tiny_spl_authority: Box<Account<'info, TinySplAuthority>>,
     #[account(mut)]
     /// CHECK: checked in cpi to bubblegum
-    pub source_tree_authority: UncheckedAccount<'info>,
-    #[account(mut)]
-    /// CHECK: checked in cpi to bubblegum
     pub destination_tree_authority: UncheckedAccount<'info>,
-    /// CHECK: This account is checked in cpi
-    #[account(mut)]
-    pub source_merkle_tree: UncheckedAccount<'info>,
     /// CHECK: This account is checked in cpi
     #[account(mut)]
     pub destination_merkle_tree: UncheckedAccount<'info>,

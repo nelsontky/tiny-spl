@@ -17,7 +17,6 @@ import { useWrapperConnection } from "@/app/common/hooks/useWrapperConnection";
 import { SendTransactionResult } from "@/app/common/types/SendTransactionResult";
 import { ReadApiAsset } from "@/app/common/utils/WrapperConnection";
 
-import { getAssetAmount } from "../../swr-hooks/utils/getAssetAmount";
 import { buildCombineTinySplTx } from "../utils/buildCombineTinySplTx";
 
 interface CombineTaskbarProps {

@@ -80,10 +80,15 @@ export const buildCombineTinySplTx = async ({
     tinySplProgram.programId
   );
 
-  const [sourceTreeAuthority] = PublicKey.findProgramAddressSync(
-    [new PublicKey(firstAsset.compression.tree).toBuffer()],
-    BUBBLEGUM_PROGRAM_ID
+  const sourceTrees = assets.map((asset) => asset.compression.tree);
+  const sourceTreeAuthorities = sourceTrees.map(
+    (tree) =>
+      PublicKey.findProgramAddressSync(
+        [new PublicKey(tree).toBuffer()],
+        BUBBLEGUM_PROGRAM_ID
+      )[0]
   );
+
   const [destinationTreeAuthority] = PublicKey.findProgramAddressSync(
     [TREE_ADDRESS_3.toBuffer()],
     BUBBLEGUM_PROGRAM_ID
@@ -141,7 +146,6 @@ export const buildCombineTinySplTx = async ({
       compressionProgram: COMPRESSION_PROGRAM_ID,
       collectionMint: collectionId,
       tinySplAuthority,
-      sourceMerkleTree: firstAssetProof.tree_id,
       destinationMerkleTree: TREE_ADDRESS_3,
       systemProgram: SystemProgram.programId,
       authority: signer,
@@ -152,11 +156,24 @@ export const buildCombineTinySplTx = async ({
       mplBubblegumProgram: BUBBLEGUM_PROGRAM_ID,
       newLeafOwner: signer,
       tokenMetadataProgram: MPL_TOKEN_METADATA_PROGRAM_ID,
-      sourceTreeAuthority,
       destinationTreeAuthority,
       treeCreatorOrDelegate: tinySplAuthority,
     })
-    .remainingAccounts(flattenedProofPaths)
+    .remainingAccounts([
+      ...sourceTrees.map((tree) => ({
+        pubkey: new PublicKey(tree),
+        isSigner: false,
+        isWritable: true,
+      })),
+
+      ...sourceTreeAuthorities.map((treeAuthority) => ({
+        pubkey: treeAuthority,
+        isSigner: false,
+        isWritable: true,
+      })),
+
+      ...flattenedProofPaths,
+    ])
     .instruction();
 
   return buildTxsFromIxs({

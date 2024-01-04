@@ -23,7 +23,9 @@ import { PublicKey } from "@metaplex-foundation/js";
       // new PublicKey("Tree2dfRMEjvHKn8BfmQXmgcCcLiVtHqMKq5j9oKN5g"),
       // new PublicKey("3aVQP4jSj5ab4Br73bVL7d7c96bJGuHXuE4iaMXPzas3"),
       // new PublicKey("EzGv9FqDepT6winVNWGiLVrTKjPD5KgB2jTiHhmFR4X6"),
-      new PublicKey("cmtDvXumGCrqC1Age74AVPhSRVXJMd8PJS91L8KbNCK")
+      // new PublicKey("cmtDvXumGCrqC1Age74AVPhSRVXJMd8PJS91L8KbNCK")
+      new PublicKey("tReeB6PqRnvzcKprWQhSjBzLRzG7zX6AAF2kQdy3Y3f"),
+      new PublicKey("22kvmCjDhDZw7MzFUWsu5tNVfvh3t4ZZ73jauCaH6djt"),
     ],
   });
 
@@ -32,7 +34,7 @@ import { PublicKey } from "@metaplex-foundation/js";
   const messageV0 = new TransactionMessage({
     payerKey: SIGNER.publicKey,
     recentBlockhash: blockhash,
-    instructions: [extendInstruction ],
+    instructions: [extendInstruction],
   }).compileToV0Message();
   const transaction = new VersionedTransaction(messageV0);
 
