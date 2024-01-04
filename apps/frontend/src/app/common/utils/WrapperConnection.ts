@@ -299,7 +299,14 @@ export class WrapperConnection extends Connection {
   }
 
   async searchAssets(
-    { ownerAddress, page, limit, grouping, compressed }: SearchAssetsRpcInput,
+    {
+      ownerAddress,
+      page,
+      limit,
+      grouping,
+      compressed,
+      burnt,
+    }: SearchAssetsRpcInput,
     axiosRequestConfig?: AxiosRequestConfig
   ): Promise<ReadApiAssetList> {
     // // `page` cannot be supplied with `before` or `after`
@@ -322,6 +329,7 @@ export class WrapperConnection extends Connection {
           page: page ?? 1,
           grouping: grouping ?? null,
           compressed,
+          burnt,
         },
       },
       axiosRequestConfig
@@ -450,6 +458,7 @@ export type SearchAssetsRpcInput = {
   page: number;
   limit: number;
   compressed: boolean;
+  burnt?: boolean;
 };
 
 export type GetAssetsByOwnerRpcInput = {

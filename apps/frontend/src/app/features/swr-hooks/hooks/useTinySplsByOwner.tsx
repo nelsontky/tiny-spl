@@ -14,7 +14,7 @@ import { filterTinySpls } from "../utils/filterTinySpls";
 import { getAssetAmount } from "../utils/getAssetAmount";
 import { getAssetCollectionId } from "../utils/getAssetCollectionId";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 100;
 
 const useTinySplListByOwner = (owner: string | undefined) => {
   const wrapperConnection = useWrapperConnection();
@@ -43,6 +43,7 @@ const useTinySplListByOwner = (owner: string | undefined) => {
             "DEEZyno8D9RCCghEWkTNarZrCW7HvvWE9z64tiqvQKpH",
           ],
           compressed: true,
+          burnt: false,
         };
 
         const assetsByOwner = await wrapperConnection.searchAssets(
