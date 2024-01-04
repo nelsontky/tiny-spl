@@ -17,6 +17,7 @@ import { useWrapperConnection } from "@/app/common/hooks/useWrapperConnection";
 import { SendTransactionResult } from "@/app/common/types/SendTransactionResult";
 import { ReadApiAsset } from "@/app/common/utils/WrapperConnection";
 
+import { getAssetAmount } from "../../swr-hooks/utils/getAssetAmount";
 import { buildCombineTinySplTx } from "../utils/buildCombineTinySplTx";
 
 interface CombineTaskbarProps {
@@ -33,7 +34,7 @@ export const CombineTaskbar = ({
   const connection = useWrapperConnection();
   const mintCount = Object.keys(selectedMints).length;
   const [loading, setLoading] = useState(false);
-  const { sendTransaction, publicKey } = useWallet();
+  const { sendTransaction, publicKey, signTransaction } = useWallet();
   const tinySplProgram = useTinySplProgram();
   const [error, setError] = useState<string>();
   const [sendTransactionResult, setSendTransactionResult] =
@@ -73,7 +74,7 @@ export const CombineTaskbar = ({
                 size="lg"
                 className={clsx("font-bold", !disabled && "animate-bounce")}
                 onClick={async () => {
-                  if (!publicKey) {
+                  if (!publicKey || !signTransaction) {
                     return;
                   }
 
@@ -89,7 +90,13 @@ export const CombineTaskbar = ({
                         assets: Object.values(selectedMints),
                       });
 
-                    const txId = await sendTransaction(transaction, connection);
+                    const signedTx = await signTransaction(transaction);
+                    const txId = await connection.sendRawTransaction(
+                      signedTx.serialize(),
+                      { skipPreflight: true }
+                    );
+                    // const txId = await sendTransaction(transaction, connection);
+                    console.log(`https://solscan.io/tx/${txId}`);
                     setSendTransactionResult({
                       blockhash,
                       lastValidBlockHeight,

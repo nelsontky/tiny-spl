@@ -99,26 +99,23 @@ export const buildCombineTinySplTx = async ({
       async (asset) => await connection.getAssetProof(new PublicKey(asset.id))
     )
   );
-  const firstAssetProof = assetProofs[0];
 
-  if (!firstAssetProof) {
-    throw new Error("Asset proof not found, this should not happen");
-  }
+  const proofPaths: AccountMeta[][] = await Promise.all(
+    assetProofs.map(async (assetProof) => {
+      const treeAccount = await ConcurrentMerkleTreeAccount.fromAccountAddress(
+        connection,
+        new PublicKey(assetProof.tree_id)
+      );
+      const canopyDepth = treeAccount.getCanopyDepth();
 
-  const treeAccount = await ConcurrentMerkleTreeAccount.fromAccountAddress(
-    connection,
-    new PublicKey(firstAssetProof.tree_id)
-  );
-  const canopyDepth = treeAccount.getCanopyDepth();
-
-  const proofPaths: AccountMeta[][] = assetProofs.map((assetProof) =>
-    assetProof.proof
-      .map((node: string) => ({
-        pubkey: new PublicKey(node),
-        isSigner: false,
-        isWritable: false,
-      }))
-      .slice(0, assetProof.proof.length - (canopyDepth ? canopyDepth : 0))
+      return assetProof.proof
+        .map((node: string) => ({
+          pubkey: new PublicKey(node),
+          isSigner: false,
+          isWritable: false,
+        }))
+        .slice(0, assetProof.proof.length - (canopyDepth ? canopyDepth : 0));
+    })
   );
   const proofPathEndIndexesExcluded = proofPaths.reduce((acc, curr) => {
     const prevEndIndex = acc.at(-1) ?? 0;
