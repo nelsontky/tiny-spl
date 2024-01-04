@@ -24,7 +24,7 @@ import {
 } from "@/app/common/utils/WrapperConnection";
 
 import { getAssetCollectionId } from "../../swr-hooks/utils/getAssetCollectionId";
-import { NEW_TREE_ADDRESS } from "../constants/treeAddresses";
+import { TREE_ADDRESS_3 } from "../constants/treeAddresses";
 
 export const buildSplitTinySplTx = async ({
   asset,
@@ -82,7 +82,7 @@ export const buildSplitTinySplTx = async ({
     BUBBLEGUM_PROGRAM_ID
   );
   const [destinationTreeAuthority] = PublicKey.findProgramAddressSync(
-    [NEW_TREE_ADDRESS.toBuffer()],
+    [TREE_ADDRESS_3.toBuffer()],
     BUBBLEGUM_PROGRAM_ID
   );
 
@@ -115,7 +115,7 @@ export const buildSplitTinySplTx = async ({
       collectionMint: collectionId,
       tinySplAuthority,
       sourceMerkleTree: assetProof.tree_id,
-      destinationMerkleTree: NEW_TREE_ADDRESS,
+      destinationMerkleTree: TREE_ADDRESS_3,
       systemProgram: SystemProgram.programId,
       authority: signer,
       bubblegumSigner: BUBBLEGUM_SIGNER,
