@@ -23,6 +23,7 @@
     "@tanstack/react-table": "^8.11.2",
     "@tiny-spl/contracts": "workspace:*",
     "axios": "^1.6.2",
+    "axios-retry": "^4.0.0",
     "bn.js": "^5.2.1",
     "clsx": "^2.0.0",
     "decimal.js": "^10.4.3",

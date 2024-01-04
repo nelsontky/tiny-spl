@@ -22,7 +22,16 @@ import {
   PublicKey,
 } from "@solana/web3.js";
 import axios, { AxiosRequestConfig } from "axios";
+import axiosRetry from "axios-retry";
 import BN from "bn.js";
+
+const axiosInstance = axios.create();
+axiosRetry(axiosInstance, {
+  retries: 10,
+  retryCondition: (error) =>
+    !!error?.response?.status && error.response.status >= 400,
+  retryDelay: axiosRetry.exponentialDelay,
+});
 
 export type JsonRpcParams<ReadApiMethodParams> = {
   method: string;
@@ -154,7 +163,7 @@ export class WrapperConnection extends Connection {
     jsonRpcParams: JsonRpcParams<ReadApiMethodParams>,
     axiosRequestConfig?: AxiosRequestConfig
   ): Promise<JsonRpcOutput<ReadApiJsonOutput>> => {
-    const response = await axios.post(
+    const response = await axiosInstance.post(
       this.rpcEndpoint,
       {
         jsonrpc: "2.0",
