@@ -1,3 +1,4 @@
+import axios from "axios";
 import Decimal from "decimal.js";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import useSWR from "swr";
@@ -54,10 +55,25 @@ const useTinySplListByOwner = (owner: string | undefined) => {
           break;
         }
 
-        const tinySpls = await filterTinySpls(
-          assetsByOwner.items,
-          wrapperConnection
+        const items = await Promise.all(
+          assetsByOwner.items.map(async (item) => {
+            if (
+              !item.content.metadata?.attributes ||
+              !item.content.links?.image
+            ) {
+              // download metadata if helius did not index it
+              const metadata = (await axios.get(item.content.json_uri)).data;
+              item.content.metadata = metadata;
+
+              if (item.content.links) {
+                item.content.links.image = metadata.image;
+              }
+            }
+            return item;
+          })
         );
+
+        const tinySpls = await filterTinySpls(items, wrapperConnection);
 
         result.push(...tinySpls);
 
